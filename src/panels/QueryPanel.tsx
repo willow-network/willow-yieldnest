@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getClient } from '../lib/client';
+import { ExamplesDropdown, Example } from '../components/ExamplesDropdown';
 
 interface Props {
   apiUrl: string;
@@ -75,6 +76,31 @@ export function QueryPanel({ apiUrl, onOpenInInspector }: Props) {
         verification is on, the SDK requests an inline proof, runs the pure-TS verifier, and
         compares the computed root to the light client's trusted root.
       </p>
+
+      <ExamplesDropdown
+        examples={[
+          {
+            label: 'All users (verified)',
+            description: 'Query user-profiles with proof verification',
+            apply: () => { setSubgroveId('user-profiles'); setFilterJson('{}'); setLimit(10); setVerify(true); },
+          },
+          {
+            label: 'All users (unverified, fast)',
+            description: 'Same query, no proof overhead',
+            apply: () => { setSubgroveId('user-profiles'); setFilterJson('{}'); setLimit(10); setVerify(false); },
+          },
+          {
+            label: 'All products in inventory',
+            description: 'Query the inventory subgrove',
+            apply: () => { setSubgroveId('inventory'); setFilterJson('{}'); setLimit(10); setVerify(false); },
+          },
+          {
+            label: 'Filter by role=admin',
+            description: 'Query with a JSON filter',
+            apply: () => { setSubgroveId('user-profiles'); setFilterJson(JSON.stringify({ role: 'admin' }, null, 2)); setLimit(10); setVerify(false); },
+          },
+        ] satisfies Example[]}
+      />
 
       <div className="form-row">
         <label className="form-field">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { grovedb } from '@willow/sdk';
 import { getClient } from '../lib/client';
+import { ExamplesDropdown, Example } from '../components/ExamplesDropdown';
 
 const { verifyGroveDBProof, hexToBytes, hashToHex } = grovedb;
 
@@ -145,6 +146,31 @@ export function DataPanel({
         GroveDB verifier. Timings, the computed root hash, and the raw proof bytes are all
         surfaced so you can see what the verifier actually does.
       </p>
+
+      <ExamplesDropdown
+        examples={[
+          {
+            label: 'Fetch user:alice from user-profiles',
+            description: 'Retrieve Alice\'s profile with proof verification',
+            apply: () => { setSubgroveId('user-profiles'); setKey('user:alice'); setVerify(true); },
+          },
+          {
+            label: 'Fetch user:bob from user-profiles',
+            description: 'Retrieve Bob\'s profile with proof verification',
+            apply: () => { setSubgroveId('user-profiles'); setKey('user:bob'); setVerify(true); },
+          },
+          {
+            label: 'Fetch product:laptop from inventory',
+            description: 'Retrieve a product record',
+            apply: () => { setSubgroveId('inventory'); setKey('product:laptop'); setVerify(true); },
+          },
+          {
+            label: 'Fetch unverified (fast, no proof)',
+            description: 'Same data, skip proof verification',
+            apply: () => { setSubgroveId('user-profiles'); setKey('user:alice'); setVerify(false); },
+          },
+        ] satisfies Example[]}
+      />
 
       <div className="form-row">
         <label className="form-field">

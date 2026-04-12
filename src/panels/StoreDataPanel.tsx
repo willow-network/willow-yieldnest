@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getClient, getConsensusClient, sign, DEVNET_VALIDATOR1 } from '../lib/client';
+import { ExamplesDropdown, Example } from '../components/ExamplesDropdown';
 
 interface Props {
   apiUrl: string;
@@ -120,6 +121,45 @@ export function StoreDataPanel({ apiUrl }: Props) {
         store, the panel fetches the key back through the pure-TS GroveDB verifier to confirm
         the write survived end-to-end.
       </p>
+
+      <ExamplesDropdown
+        examples={[
+          {
+            label: '1. Register "user-profiles" subgrove',
+            description: 'Sets up a subgrove for storing user data',
+            apply: () => { setRegId('user-profiles'); setRegName('User Profiles'); },
+          },
+          {
+            label: '2. Store Alice in user-profiles',
+            description: 'Stores a user record with name, email, role',
+            apply: () => {
+              setStoreId('user-profiles');
+              setStoreKey('user:alice');
+              setStoreValueJson(JSON.stringify({ name: 'Alice', email: 'alice@example.com', role: 'admin', balance: 50000 }, null, 2));
+            },
+          },
+          {
+            label: '3. Store Bob in user-profiles',
+            description: 'Another user record to query later',
+            apply: () => {
+              setStoreId('user-profiles');
+              setStoreKey('user:bob');
+              setStoreValueJson(JSON.stringify({ name: 'Bob', email: 'bob@example.com', role: 'user', balance: 12500 }, null, 2));
+            },
+          },
+          {
+            label: '4. Register "inventory" + Store a product',
+            description: 'Different subgrove for product data',
+            apply: () => {
+              setRegId('inventory');
+              setRegName('Product Inventory');
+              setStoreId('inventory');
+              setStoreKey('product:laptop');
+              setStoreValueJson(JSON.stringify({ name: 'ThinkPad X1', price: 1299, stock: 42, category: 'electronics' }, null, 2));
+            },
+          },
+        ] satisfies Example[]}
+      />
 
       <h3 style={{ marginTop: 0 }}>1. Register a subgrove</h3>
       <div className="form-row">
