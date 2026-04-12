@@ -15,6 +15,7 @@ type TxState =
 export function StoreDataPanel({ apiUrl }: Props) {
   const [regId, setRegId] = useState('');
   const [regName, setRegName] = useState('');
+  const [regFunding, setRegFunding] = useState('1');
   const [regState, setRegState] = useState<TxState>({ kind: 'idle' });
 
   const [storeId, setStoreId] = useState('');
@@ -29,6 +30,7 @@ export function StoreDataPanel({ apiUrl }: Props) {
     }
     setRegState({ kind: 'loading', step: 'Broadcasting RegisterSubgrove tx…' });
     try {
+      const fundingWei = BigInt(Math.floor(parseFloat(regFunding) * 1e18)).toString();
       const consensus = getConsensusClient(apiUrl);
       const result = await consensus.registerSubgrove(
         regId,
@@ -37,6 +39,9 @@ export function StoreDataPanel({ apiUrl }: Props) {
         DEVNET_VALIDATOR1.privateKey,
         DEVNET_VALIDATOR1.publicKeyId,
         sign,
+        undefined,
+        undefined,
+        fundingWei,
       );
       if (!storeId) setStoreId(regId);
       setRegState({
@@ -181,6 +186,17 @@ export function StoreDataPanel({ apiUrl }: Props) {
             placeholder="My Subgrove"
             spellCheck={false}
             data-testid="store-reg-name"
+          />
+        </label>
+        <label className="form-field" style={{ flex: '0 0 140px' }}>
+          <span>initial funding (WILL)</span>
+          <input
+            type="number"
+            value={regFunding}
+            min={0}
+            step={0.1}
+            onChange={(e) => setRegFunding(e.target.value)}
+            data-testid="store-reg-funding"
           />
         </label>
       </div>

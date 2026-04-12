@@ -51,8 +51,8 @@ export function getConsensusClient(apiUrl: string): ConsensusClient {
     const rpcPort = 26557 + nodeN * 100;
     cometUrl = apiUrl.replace(`:${apiPort}`, `:${rpcPort}`);
   } else {
-    // Proxy mode or unknown — default to local node 1 CometBFT
-    cometUrl = 'http://127.0.0.1:26657';
+    // Proxy mode — route through Vite proxy to avoid CORS
+    cometUrl = '/cometbft-rpc';
   }
 
   if (cachedConsensus && cachedConsensusUrl === cometUrl) return cachedConsensus;
@@ -61,6 +61,9 @@ export function getConsensusClient(apiUrl: string): ConsensusClient {
     consensusRpcUrl: cometUrl,
     apiUrl,
     chainId: 'test-chain-consensus',
+    maxRetries: 3,
+    requestTimeoutSecs: 30,
+    retryDelaySecs: 1,
   });
   cachedConsensusUrl = cometUrl;
   return cachedConsensus;

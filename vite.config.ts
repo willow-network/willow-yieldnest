@@ -12,6 +12,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/willow-api/, ''),
       },
+      '/cometbft-rpc': {
+        target: 'http://127.0.0.1:26657',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cometbft-rpc/, ''),
+      },
     },
   },
   build: {

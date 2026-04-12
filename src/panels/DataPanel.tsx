@@ -32,8 +32,8 @@ type FetchState =
   | SuccessState
   | { kind: 'error'; message: string; code?: string };
 
-async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+async function fetchJson(url: string, headers?: Record<string, string>): Promise<any> {
+  const res = await fetch(url, headers ? { headers } : undefined);
   if (!res.ok) {
     throw new Error(`${url} → HTTP ${res.status}`);
   }
@@ -92,9 +92,13 @@ export function DataPanel({
       // Verified path — fetch data + proof manually so we can surface timings
       // and the proof hex in the UI. The high-level client.data.getData() does
       // the same work internally but hides the breakdown.
+      const client = getClient(apiUrl);
+      const authHeaders = client.auth.getAuthHeaders('GET', `/data/${subgroveId}/${key}`);
+
       const fetchDataStart = performance.now();
       const dataRes = await fetchJson(
         `${apiUrl}/data/${encodeURIComponent(subgroveId)}/${encodeURIComponent(key)}`,
+        authHeaders,
       );
       const fetchDataMs = performance.now() - fetchDataStart;
       if (!dataRes?.success) {
@@ -102,9 +106,11 @@ export function DataPanel({
       }
       const data = dataRes.data;
 
+      const proofAuthHeaders = client.auth.getAuthHeaders('GET', `/proof/${subgroveId}/${key}`);
       const fetchProofStart = performance.now();
       const proofRes = await fetchJson(
         `${apiUrl}/proof/${encodeURIComponent(subgroveId)}/${encodeURIComponent(key)}`,
+        proofAuthHeaders,
       );
       const fetchProofMs = performance.now() - fetchProofStart;
       if (!proofRes?.success || !proofRes?.data?.proof) {
