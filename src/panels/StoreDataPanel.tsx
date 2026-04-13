@@ -90,10 +90,14 @@ export function StoreDataPanel({ apiUrl }: Props) {
         sign,
       );
 
-      setStoreState({ kind: 'loading', step: 'Stored. Round-trip verifying…' });
+      setStoreState({ kind: 'loading', step: 'Waiting for confirmation…' });
 
-      // Wait a beat for consensus to finalize, then fetch with verification.
-      await new Promise((r) => setTimeout(r, 2000));
+      // Wait for the tx to be committed to a block before round-trip fetching.
+      if (result.txHash) {
+        await consensus.waitForTransaction(result.txHash, 15, 1);
+      }
+
+      setStoreState({ kind: 'loading', step: 'Round-trip verifying…' });
 
       let roundTripVerified = false;
       try {
