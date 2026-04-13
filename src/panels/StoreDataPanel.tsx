@@ -1,3 +1,4 @@
+import { extractErrorMessage } from '../lib/errors';
 import { useState } from 'react';
 import { getClient, getConsensusClient, sign, DEVNET_VALIDATOR1 } from '../lib/client';
 import { ExamplesDropdown, Example } from '../components/ExamplesDropdown';
@@ -52,7 +53,7 @@ export function StoreDataPanel({ apiUrl }: Props) {
     } catch (err) {
       setRegState({
         kind: 'error',
-        message: err instanceof Error ? err.message : String(err),
+        message: extractErrorMessage(err),
       });
     }
   };
@@ -112,7 +113,7 @@ export function StoreDataPanel({ apiUrl }: Props) {
     } catch (err) {
       setStoreState({
         kind: 'error',
-        message: err instanceof Error ? err.message : String(err),
+        message: extractErrorMessage(err),
       });
     }
   };

@@ -1,3 +1,4 @@
+import { extractErrorMessage } from '../lib/errors';
 import { useEffect, useState } from 'react';
 import { grovedb } from '@willow/sdk';
 import { getClient } from '../lib/client';
@@ -35,7 +36,12 @@ type FetchState =
 async function fetchJson(url: string, headers?: Record<string, string>): Promise<any> {
   const res = await fetch(url, headers ? { headers } : undefined);
   if (!res.ok) {
-    throw new Error(`${url} → HTTP ${res.status}`);
+    let detail = '';
+    try {
+      const body = await res.json();
+      detail = body?.error ?? '';
+    } catch { /* ignore */ }
+    throw new Error(detail || `${url} → HTTP ${res.status}`);
   }
   return res.json();
 }
@@ -65,13 +71,12 @@ export function DataPanel({
       return;
     }
     setState({ kind: 'loading' });
-    const client = getClient(apiUrl);
     const totalStart = performance.now();
 
     try {
       if (!verify) {
         const fetchStart = performance.now();
-        const data = await client.data.getDataUnverified(subgroveId, key);
+        const data = await getClient(apiUrl).data.getDataUnverified(subgroveId, key);
         const fetchDataMs = performance.now() - fetchStart;
         setState({
           kind: 'ok',
@@ -95,22 +100,19 @@ export function DataPanel({
       const client = getClient(apiUrl);
       const authHeaders = client.auth.getAuthHeaders('GET', `/data/${subgroveId}/${key}`);
 
+      const dataPath = `/data/${subgroveId}/${key}`;
       const fetchDataStart = performance.now();
-      const dataRes = await fetchJson(
-        `${apiUrl}/data/${encodeURIComponent(subgroveId)}/${encodeURIComponent(key)}`,
-        authHeaders,
-      );
+      const dataRes = await fetchJson(`${apiUrl}${dataPath}`, authHeaders);
       const fetchDataMs = performance.now() - fetchDataStart;
       if (!dataRes?.success) {
         throw new Error(dataRes?.error || 'Data not found');
       }
       const data = dataRes.data;
 
-      const proofAuthHeaders = client.auth.getAuthHeaders('GET', `/proof/${subgroveId}/${key}`);
+      const proofPath = `/proof/${subgroveId}/${key}`;
+      const proofAuthHeaders = client.auth.getAuthHeaders('GET', proofPath);
       const fetchProofStart = performance.now();
-      const proofRes = await fetchJson(
-        `${apiUrl}/proof/${encodeURIComponent(subgroveId)}/${encodeURIComponent(key)}`,
-        proofAuthHeaders,
+      const proofRes = await fetchJson(`${apiUrl}${proofPath}`, proofAuthHeaders,
       );
       const fetchProofMs = performance.now() - fetchProofStart;
       if (!proofRes?.success || !proofRes?.data?.proof) {
@@ -137,7 +139,7 @@ export function DataPanel({
         },
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = extractErrorMessage(err);
       const code = (err as { code?: string })?.code;
       setState({ kind: 'error', message, code });
     }

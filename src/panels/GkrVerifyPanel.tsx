@@ -1,3 +1,4 @@
+import { extractErrorMessage } from '../lib/errors';
 import { useState } from 'react';
 
 interface Props {
@@ -64,7 +65,7 @@ export function GkrVerifyPanel({ apiUrl }: Props) {
     } catch (err) {
       setState({
         kind: 'error',
-        message: err instanceof Error ? err.message : String(err),
+        message: extractErrorMessage(err),
       });
     }
   };

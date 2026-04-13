@@ -1,3 +1,4 @@
+import { extractErrorMessage } from '../lib/errors';
 import { useEffect, useState } from 'react';
 
 interface Props {
@@ -42,7 +43,7 @@ export function ValidatorsPanel({ apiUrl }: Props) {
     } catch (err) {
       setState({
         kind: 'error',
-        message: err instanceof Error ? err.message : String(err),
+        message: extractErrorMessage(err),
       });
     }
   };

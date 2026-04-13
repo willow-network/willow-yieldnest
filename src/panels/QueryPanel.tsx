@@ -1,3 +1,4 @@
+import { extractErrorMessage } from '../lib/errors';
 import { useState } from 'react';
 import { getClient } from '../lib/client';
 import { ExamplesDropdown, Example } from '../components/ExamplesDropdown';
@@ -63,7 +64,7 @@ export function QueryPanel({ apiUrl, onOpenInInspector }: Props) {
         totalMs,
       });
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = extractErrorMessage(err);
       setState({ kind: 'error', message });
     }
   };

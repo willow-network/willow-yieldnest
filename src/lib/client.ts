@@ -22,7 +22,10 @@ let cachedApiUrl: string | null = null;
 export function getClient(apiUrl: string): WillowClient {
   if (cached && cachedApiUrl === apiUrl) return cached;
 
-  const client = new WillowClient({ apiUrl });
+  const client = new WillowClient({
+    apiUrl,
+    consensusRpcUrl: apiUrl.startsWith('/') ? '/cometbft-rpc' : undefined,
+  });
   client.auth.setIdentity(
     DEVNET_VALIDATOR1.did,
     DEVNET_VALIDATOR1.privateKey,

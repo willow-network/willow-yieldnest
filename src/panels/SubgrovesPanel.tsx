@@ -1,3 +1,4 @@
+import { extractErrorMessage } from '../lib/errors';
 import { useEffect, useState } from 'react';
 
 interface Props {
@@ -39,7 +40,7 @@ export function SubgrovesPanel({ apiUrl, onSubgroveClick }: Props) {
         if (cancelled) return;
         setState({
           kind: 'error',
-          message: err instanceof Error ? err.message : String(err),
+          message: extractErrorMessage(err),
         });
       }
     };
