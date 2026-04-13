@@ -7,16 +7,18 @@ import { ProofInspectorPanel } from './panels/ProofInspectorPanel';
 import { StatePanel } from './panels/StatePanel';
 import { ValidatorsPanel } from './panels/ValidatorsPanel';
 import { GkrVerifyPanel } from './panels/GkrVerifyPanel';
+import { AnalyticsPanel } from './panels/AnalyticsPanel';
 import { ConnectionBar } from './components/ConnectionBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { useTheme } from './lib/theme';
 import { DEFAULT_API_URL } from './lib/client';
 
-type Tab = 'data' | 'query' | 'store' | 'subgroves' | 'validators' | 'state' | 'inspector' | 'gkr';
+type Tab = 'data' | 'query' | 'analytics' | 'store' | 'subgroves' | 'validators' | 'state' | 'inspector' | 'gkr';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'data', label: 'Data' },
   { id: 'query', label: 'Query' },
+  { id: 'analytics', label: 'Analytics' },
   { id: 'store', label: 'Store' },
   { id: 'subgroves', label: 'Subgroves' },
   { id: 'validators', label: 'Validators' },
@@ -94,6 +96,7 @@ export function App() {
         {tab === 'query' && (
           <QueryPanel apiUrl={apiUrl} onOpenInInspector={jumpToInspector} />
         )}
+        {tab === 'analytics' && <AnalyticsPanel apiUrl={apiUrl} />}
         {tab === 'store' && <StoreDataPanel apiUrl={apiUrl} />}
         {tab === 'subgroves' && (
           <SubgrovesPanel apiUrl={apiUrl} onSubgroveClick={jumpToData} />
