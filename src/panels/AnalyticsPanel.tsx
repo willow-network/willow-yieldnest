@@ -5,6 +5,7 @@ import { ExamplesDropdown, Example } from '../components/ExamplesDropdown';
 
 interface Props {
   apiUrl: string;
+  indexerUrl?: string;
 }
 
 interface SchemaEntity {
@@ -13,6 +14,13 @@ interface SchemaEntity {
 }
 
 type ChartType = 'bar' | 'line';
+
+/** Backend that served a query, plus whether `auto` routing fell back. */
+interface SourceTag {
+  source: 'validator' | 'indexer';
+  fallback: boolean;
+  indexerDid?: string;
+}
 
 type PanelState =
   | { kind: 'idle' }
@@ -25,8 +33,37 @@ type PanelState =
       data: Record<string, unknown>[];
       chartType: ChartType;
       decimals: number;
+      sourceTag?: SourceTag;
     }
   | { kind: 'error'; message: string };
+
+function SourceBadge({ tag }: { tag: SourceTag }) {
+  if (tag.source === 'indexer') {
+    return (
+      <span
+        className="badge badge-ok"
+        title={tag.indexerDid ? `served by ${tag.indexerDid}` : undefined}
+      >
+        ● indexer
+      </span>
+    );
+  }
+  if (tag.fallback) {
+    return (
+      <span
+        className="badge badge-warn"
+        title="No indexer was reachable — falling back to validator chain-tip data"
+      >
+        ● auto → validator fallback
+      </span>
+    );
+  }
+  return (
+    <span className="badge badge-ok" title="Consensus-verified chain-tip">
+      ● validator chain-tip
+    </span>
+  );
+}
 
 function formatNumber(n: number): string {
   const abs = Math.abs(n);
@@ -151,7 +188,7 @@ function LineChart({ points, color }: { points: [number, number][]; color: strin
   );
 }
 
-export function AnalyticsPanel({ apiUrl }: Props) {
+export function AnalyticsPanel({ apiUrl, indexerUrl }: Props) {
   const [subgroveId, setSubgroveId] = useState('');
   const [schema, setSchema] = useState<SchemaEntity[]>([]);
   const [selectedEntity, setSelectedEntity] = useState(0);
@@ -166,18 +203,18 @@ export function AnalyticsPanel({ apiUrl }: Props) {
     if (!subgroveId) return;
     setSchemaLoading(true);
     try {
-      const client = getClient(apiUrl);
-      const headers = client.auth.getAuthHeaders('POST', `/graphql/${subgroveId}`);
-      const res = await fetch(`${apiUrl}/graphql/${subgroveId}`, {
-        method: 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: '{ __schema { types { name kind fields { name type { name kind ofType { name kind } } } } } }',
-        }),
-      });
-      const body = await res.json();
-      const data = body?.data?.data ?? body?.data;
-      const types = data?.__schema?.types ?? [];
+      // The SDK routes this query: indexer if any serves this subgrove,
+      // otherwise the validator (for chain-tip). The user doesn't need to
+      // configure anything — discovery happens via GET /indexers.
+      const client = getClient(apiUrl, indexerUrl);
+      const { result } = await client.graphqlQuery(
+        subgroveId,
+        '{ __schema { types { name kind fields { name type { name kind ofType { name kind } } } } } }',
+      );
+
+      // Server wraps GraphQL responses in ApiResponse { success, data: { data, errors } }
+      const gql = (result as any)?.data ?? result;
+      const types = gql?.__schema?.types ?? [];
       const entities: SchemaEntity[] = types
         .filter(
           (t: any) =>
@@ -191,18 +228,63 @@ export function AnalyticsPanel({ apiUrl }: Props) {
           name: t.name,
           fields: t.fields.map((f: any) => f.name).filter((n: string) => n !== 'id'),
         }));
-      setSchema(entities);
-      setSelectedEntity(0);
       if (entities.length > 0) {
+        setSchema(entities);
+        setSelectedEntity(0);
         const defaultMetric = entities[0].fields.findIndex((f: string) =>
           ['tick', 'amount', 'value', 'cost', 'balance', 'price', 'total', 'count'].includes(f),
         );
         setSelectedMetric(defaultMetric >= 0 ? defaultMetric : 0);
+      } else {
+        // No GraphQL schema — try REST /query to discover fields from actual data
+        setSchema([]);
+        await loadFromRestQuery();
       }
     } catch (err) {
       setState({ kind: 'error', message: `Schema load failed: ${extractErrorMessage(err)}` });
     } finally {
       setSchemaLoading(false);
+    }
+  };
+
+  const loadFromRestQuery = async () => {
+    setState({ kind: 'loading', step: 'No GraphQL schema. Fetching data via REST…' });
+    try {
+      const client = getClient(apiUrl, indexerUrl);
+      const response = await client.data.queryUnverified(subgroveId, { filters: {}, limit: 100 });
+      const docs = response.documents ?? [];
+      if (docs.length === 0) {
+        setState({ kind: 'error', message: `Subgrove "${subgroveId}" has no data yet.` });
+        return;
+      }
+      // Discover fields from the first document
+      const allFields = Object.keys(docs[0]).filter((k) => k !== 'owner_did');
+      const numericFields = allFields.filter((f) =>
+        docs.some((d) => typeof d[f] === 'number' || (typeof d[f] === 'string' && !isNaN(parseFloat(d[f])))),
+      );
+      const metricField = numericFields[0] ?? allFields[0] ?? 'value';
+      const groupFields = allFields.filter(
+        (f) => f !== metricField && typeof docs[0][f] === 'string',
+      );
+
+      // Build synthetic schema from REST data
+      setSchema([{ name: 'records', fields: allFields }]);
+      setSelectedEntity(0);
+      const metricIdx = allFields.indexOf(metricField);
+      setSelectedMetric(metricIdx >= 0 ? metricIdx : 0);
+
+      // Show the data immediately
+      setState({
+        kind: 'ok',
+        entity: subgroveId,
+        metric: metricField,
+        groupBy: groupFields[0] ?? '',
+        data: docs,
+        chartType,
+        decimals,
+      });
+    } catch (err) {
+      setState({ kind: 'error', message: extractErrorMessage(err) });
     }
   };
 
@@ -214,20 +296,20 @@ export function AnalyticsPanel({ apiUrl }: Props) {
 
     setState({ kind: 'loading', step: 'Fetching data via GraphQL…' });
     try {
-      const client = getClient(apiUrl);
-      const headers = client.auth.getAuthHeaders('POST', `/graphql/${subgroveId}`);
+      const client = getClient(apiUrl, indexerUrl);
       const plural = entity.name[0].toLowerCase() + entity.name.slice(1) + 's';
       const fields = [metric, 'blockNumber'];
       if (groupBy && !fields.includes(groupBy)) fields.push(groupBy);
 
       const query = `{ ${plural}(first: 500, orderBy: blockNumber, orderDirection: desc) { ${fields.join(' ')} } }`;
-      const res = await fetch(`${apiUrl}/graphql/${subgroveId}`, {
-        method: 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query }),
-      });
-      const body = await res.json();
-      const data = body?.data?.data?.[plural] ?? body?.data?.[plural] ?? [];
+      const { result, source, fallback, indexerDid } = await client.graphqlQuery(
+        subgroveId,
+        query,
+      );
+      const sourceTag: SourceTag = { source, fallback, indexerDid };
+
+      const gql = (result as any)?.data ?? result;
+      const data = gql?.[plural] ?? [];
 
       setState({
         kind: 'ok',
@@ -237,6 +319,7 @@ export function AnalyticsPanel({ apiUrl }: Props) {
         data,
         chartType,
         decimals,
+        sourceTag,
       });
     } catch (err) {
       setState({ kind: 'error', message: extractErrorMessage(err) });
@@ -376,6 +459,7 @@ export function AnalyticsPanel({ apiUrl }: Props) {
               {state.data.length} {state.entity} records
             </span>
             <div className="result-header-right">
+              {state.sourceTag && <SourceBadge tag={state.sourceTag} />}
               <span>
                 {state.metric}
                 {state.groupBy ? ` grouped by ${state.groupBy}` : ''}

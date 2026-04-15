@@ -11,7 +11,7 @@ import { AnalyticsPanel } from './panels/AnalyticsPanel';
 import { ConnectionBar } from './components/ConnectionBar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { useTheme } from './lib/theme';
-import { DEFAULT_API_URL } from './lib/client';
+import { DEFAULT_API_URL, DEFAULT_INDEXER_URL } from './lib/client';
 
 type Tab = 'data' | 'query' | 'analytics' | 'store' | 'subgroves' | 'validators' | 'state' | 'inspector' | 'gkr';
 
@@ -29,6 +29,7 @@ const TABS: { id: Tab; label: string }[] = [
 
 export function App() {
   const [apiUrl, setApiUrl] = useState(DEFAULT_API_URL);
+  const [indexerUrl, setIndexerUrl] = useState(DEFAULT_INDEXER_URL);
   const [tab, setTab] = useState<Tab>('data');
   const [theme, , toggleTheme] = useTheme();
   const [prefillSubgrove, setPrefillSubgrove] = useState<string | null>(null);
@@ -57,7 +58,12 @@ export function App() {
           <h1>Willow Explorer</h1>
         </div>
         <div className="header-right">
-          <ConnectionBar apiUrl={apiUrl} onApiUrlChange={setApiUrl} />
+          <ConnectionBar
+            apiUrl={apiUrl}
+            indexerUrl={indexerUrl}
+            onApiUrlChange={setApiUrl}
+            onIndexerUrlChange={setIndexerUrl}
+          />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </header>
@@ -96,7 +102,7 @@ export function App() {
         {tab === 'query' && (
           <QueryPanel apiUrl={apiUrl} onOpenInInspector={jumpToInspector} />
         )}
-        {tab === 'analytics' && <AnalyticsPanel apiUrl={apiUrl} />}
+        {tab === 'analytics' && <AnalyticsPanel apiUrl={apiUrl} indexerUrl={indexerUrl} />}
         {tab === 'store' && <StoreDataPanel apiUrl={apiUrl} />}
         {tab === 'subgroves' && (
           <SubgrovesPanel apiUrl={apiUrl} onSubgroveClick={jumpToData} />

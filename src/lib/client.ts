@@ -17,13 +17,15 @@ export const DEVNET_VALIDATOR1 = {
 } as const;
 
 let cached: WillowClient | null = null;
-let cachedApiUrl: string | null = null;
+let cachedKey: string | null = null;
 
-export function getClient(apiUrl: string): WillowClient {
-  if (cached && cachedApiUrl === apiUrl) return cached;
+export function getClient(apiUrl: string, indexerUrl?: string): WillowClient {
+  const key = `${apiUrl}|${indexerUrl ?? ''}`;
+  if (cached && cachedKey === key) return cached;
 
   const client = new WillowClient({
     apiUrl,
+    indexerUrl: indexerUrl || undefined,
     consensusRpcUrl: apiUrl.startsWith('/') ? '/cometbft-rpc' : undefined,
   });
   client.auth.setIdentity(
@@ -33,18 +35,13 @@ export function getClient(apiUrl: string): WillowClient {
   );
 
   cached = client;
-  cachedApiUrl = apiUrl;
+  cachedKey = key;
   return client;
 }
 
 let cachedConsensus: ConsensusClient | null = null;
 let cachedConsensusUrl: string | null = null;
 
-/**
- * Get a ConsensusClient for broadcasting transactions to CometBFT.
- * Derives the CometBFT RPC URL from the API URL (e.g., :3031 → :26657).
- * If the API URL is a proxy path (like /willow-api), defaults to localhost:26657.
- */
 export function getConsensusClient(apiUrl: string): ConsensusClient {
   let cometUrl: string;
   const match = apiUrl.match(/:(\d+)(\/)?$/);
@@ -54,7 +51,6 @@ export function getConsensusClient(apiUrl: string): ConsensusClient {
     const rpcPort = 26557 + nodeN * 100;
     cometUrl = apiUrl.replace(`:${apiPort}`, `:${rpcPort}`);
   } else {
-    // Proxy mode — route through Vite proxy to avoid CORS
     cometUrl = '/cometbft-rpc';
   }
 
@@ -76,9 +72,9 @@ export function sign(message: string, privateKey: string): string {
   return signEd25519(message, privateKey);
 }
 
-// In dev mode, Vite proxies /willow-api/* → http://127.0.0.1:3031/* so we
-// avoid CORS. For production, set the full URL of the Willow API node.
 export const DEFAULT_API_URL =
   typeof window !== 'undefined' && window.location.hostname === '127.0.0.1'
     ? '/willow-api'
     : 'http://127.0.0.1:3031';
+
+export const DEFAULT_INDEXER_URL = '';
