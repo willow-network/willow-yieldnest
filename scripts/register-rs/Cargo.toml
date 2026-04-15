@@ -1,0 +1,21 @@
+[package]
+name = "yieldnest-register"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "yieldnest-register"
+path = "src/main.rs"
+
+[dependencies]
+willow-sdk    = { path = "../../../willow/sdk/willow-rust" }
+tokio         = { version = "1", features = ["macros", "rt-multi-thread"] }
+serde         = { version = "1", features = ["derive"] }
+serde_json    = "1"
+anyhow        = "1"
+clap          = { version = "4", features = ["derive"] }
+ed25519-dalek = "2"
+hex           = "0.4"
+
+[workspace]

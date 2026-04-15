@@ -1,0 +1,23 @@
+{
+  "subgrove_id": "yieldnest-governance",
+  "description": "YND governance token — Ethereum mainnet anchor (multi-chain expansion via future WASM handler)",
+  "mode": {
+    "BlockchainIndexing": {
+      "execution_mode": "GkrExecution",
+      "retention_window": "Indefinite",
+      "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "50000000000000000" },
+      "manifest": {
+        "chain_id": 1,
+        "start_block": 24830000,
+        "contracts": [
+          { "name": "YND", "address": "0x7159cc276D7d17Ab4b3bEb19959E1F39368a45Ba", "abi": "ERC20Votes" }
+        ],
+        "events": [
+          "Transfer(address,address,uint256)",
+          "DelegateChanged(address,address,address)",
+          "DelegateVotesChanged(address,uint256,uint256)"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+# YieldNest demo indexer — runs as did:willow:indexer-1 (pre-funded at genesis)
+# with a deterministic signing key (sha256 of "did:willow:indexer-1" +
+# "indexer-signing-key", per willow-indexer bin).
+
+node_did = "did:willow:indexer-1"
+public_key_id = "did:willow:indexer-1#key-1"
+
+grovedb_path = "/Users/pauldelucia/Documents/Willow/willow/partners/yieldnest/indexer/grovedb"
+
+consensus_rpc_endpoint = "http://localhost:26657"
+
+# Unique ports (avoid clash with the existing devnet indexers on 3042/30303/9090/10300)
+p2p_port = 30313
+metrics_port = 9100
+historical_query_port = 3051
+grovedb_visualizer_port = 10310
+
+max_concurrent_indexing = 6
+storage_limit_gb = 100
+
+# Ethereum mainnet RPCs for YieldNest contracts. Public endpoints — rate-limited
+# but fine for a demo. For production swap in Alchemy/Infura URLs.
+eth_rpc_endpoints = [
+    "https://eth-mainnet.g.alchemy.com/v2/_agm3fd1Cnk05G6p4owj3",
+    "https://mainnet.infura.io/v3/512ef33075a144119ab8c5af99d3491c",
+    "https://eth.llamarpc.com",
+]

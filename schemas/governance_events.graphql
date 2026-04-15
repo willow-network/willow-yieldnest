@@ -1,0 +1,29 @@
+type Transfer @entity {
+  id: ID!
+  from: String!
+  to: String!
+  value: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: String!
+}
+
+type DelegateChanged @entity {
+  id: ID!
+  delegator: String!
+  fromDelegate: String!
+  toDelegate: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: String!
+}
+
+type DelegateVotesChanged @entity {
+  id: ID!
+  delegate: String!
+  previousBalance: BigInt!
+  newBalance: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: String!
+}

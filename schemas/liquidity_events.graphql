@@ -1,0 +1,33 @@
+type Swap @entity {
+  id: ID!
+  sender: String!
+  amount0In: BigInt!
+  amount1In: BigInt!
+  amount0Out: BigInt!
+  amount1Out: BigInt!
+  to: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: String!
+}
+
+type Mint @entity {
+  id: ID!
+  sender: String!
+  amount0: BigInt!
+  amount1: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: String!
+}
+
+type Burn @entity {
+  id: ID!
+  sender: String!
+  amount0: BigInt!
+  amount1: BigInt!
+  to: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: String!
+}

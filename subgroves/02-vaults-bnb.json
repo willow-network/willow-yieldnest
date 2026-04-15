@@ -1,0 +1,25 @@
+{
+  "subgrove_id": "yieldnest-vaults-bnb",
+  "description": "YieldNest vault events on BNB Chain — ynBNB, ynBNBx, ynBTCk",
+  "mode": {
+    "BlockchainIndexing": {
+      "execution_mode": "GkrExecution",
+      "retention_window": { "Blocks": 432000 },
+      "indexer_config": { "min_indexers": 3, "reward_rate_per_block": "100000000000000000" },
+      "manifest": {
+        "chain_id": 56,
+        "start_block": 49950000,
+        "contracts": [
+          { "name": "ynBNB",  "address": "0x304B5845b9114182ECb4495Be4C91a273b74B509", "abi": "ERC4626" },
+          { "name": "ynBNBx", "address": "0x32C830f5c34122C6afB8aE87ABA541B7900a2C5F", "abi": "ERC4626" },
+          { "name": "ynBTCk", "address": "0x78839cE14a8213779128Ee4da6D75E1326606A56", "abi": "ERC4626" }
+        ],
+        "events": [
+          "Deposit(address,address,uint256,uint256)",
+          "Withdraw(address,address,address,uint256,uint256)",
+          "Transfer(address,address,uint256)"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+# Rust build artefacts
+target/
+Cargo.lock
+
+# Local indexer state (grovedb files, logs)
+indexer/grovedb/
+indexer/*.log
+
+# Persisted demo DID + key (generated at first bringup)
+**/did.json
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+
+# Logs
+*.log

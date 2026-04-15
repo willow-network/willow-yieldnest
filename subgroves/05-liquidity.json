@@ -1,0 +1,23 @@
+{
+  "subgrove_id": "yieldnest-liquidity",
+  "description": "DEX liquidity for yn* tokens — powers Risk Radar",
+  "mode": {
+    "BlockchainIndexing": {
+      "execution_mode": "GkrExecution",
+      "retention_window": { "Blocks": 432000 },
+      "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "75000000000000000" },
+      "manifest": {
+        "chain_id": 1,
+        "start_block": 24830000,
+        "contracts": [
+          { "name": "CurveYnethWsteth", "address": "0x0000000000000000000000000000000000000000", "abi": "CurvePool" }
+        ],
+        "events": [
+          "Swap(address,uint256,uint256,uint256,uint256,address)",
+          "Mint(address,uint256,uint256)",
+          "Burn(address,uint256,uint256,address)"
+        ]
+      }
+    }
+  }
+}
