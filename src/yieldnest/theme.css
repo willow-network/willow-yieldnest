@@ -1,0 +1,77 @@
+:root {
+  --yn-bg: #0a0e1a;
+  --yn-surface: #121829;
+  --yn-border: #1f2a44;
+  --yn-text: #e8ecf5;
+  --yn-text-dim: #8993ab;
+  --yn-accent: #5b8def;
+  --yn-accent-glow: #7da0ff;
+  --yn-success: #3ddc97;
+  --yn-warn: #ffb347;
+  --yn-proof: #a5f3d9;
+}
+
+body {
+  background: var(--yn-bg);
+  color: var(--yn-text);
+  font-family: "Inter", -apple-system, system-ui, sans-serif;
+  margin: 0;
+}
+
+.yn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--yn-border);
+}
+
+.yn-logo { font-weight: 700; font-size: 22px; letter-spacing: -0.5px; }
+.yn-logo span { color: var(--yn-accent); }
+.yn-powered { font-size: 12px; color: var(--yn-text-dim); }
+.yn-powered strong { color: var(--yn-proof); }
+
+.yn-nav { display: flex; gap: 24px; }
+.yn-nav a {
+  color: var(--yn-text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+}
+.yn-nav a.active { color: var(--yn-text); border-bottom-color: var(--yn-accent); }
+
+.yn-container { max-width: 1240px; margin: 0 auto; padding: 32px; }
+
+.yn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+
+.yn-card {
+  background: var(--yn-surface);
+  border: 1px solid var(--yn-border);
+  border-radius: 14px;
+  padding: 20px 22px;
+}
+.yn-card h3 { margin: 0 0 4px; font-size: 14px; color: var(--yn-text-dim); font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase; }
+.yn-card .big { font-size: 28px; font-weight: 700; }
+.yn-card .sub { font-size: 13px; color: var(--yn-text-dim); margin-top: 4px; }
+
+.yn-proof-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--yn-proof);
+  background: rgba(165, 243, 217, 0.08);
+  border: 1px solid rgba(165, 243, 217, 0.25);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.yn-proof-badge::before { content: "✓"; font-weight: 700; }
+
+.yn-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.yn-table th, .yn-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--yn-border); }
+.yn-table th { color: var(--yn-text-dim); font-weight: 500; font-size: 12px; text-transform: uppercase; }
+
+.yn-placeholder { color: var(--yn-text-dim); font-style: italic; }

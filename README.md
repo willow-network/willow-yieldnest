@@ -1,127 +1,31 @@
-# @willow/explorer-web
+# YieldNest × Willow Explorer
 
-Browser-based explorer for the Willow decentralized data protocol. Companion to the desktop `willow-explorer` (egui/Rust), built on `@willow/sdk` with pure-TypeScript GroveDB proof verification — no WASM, no native deps, runs anywhere a bundler runs.
+Forked from `willow-explorer-web` — YieldNest-branded dashboard that renders
+YieldNest protocol state exclusively from Willow subgroves, with
+proof-verification on every query.
 
-Every byte of cryptographic verification runs in your browser. The computed root hash you see in the UI is byte-for-byte identical to what Rust's `GroveDb::prove_query` + `verify_query` produce, proven by a Rust-generated fixture round-trip test.
+## Subgroves consumed
 
-## Quick start
+See `../willow/partners/yieldnest/` for manifests. This app queries:
+
+- `yieldnest-vaults-eth`, `-bnb`, `-l2` — vault TVL/APY/positions
+- `yieldnest-restaking-eth` — StakingNodesManager + EL/CL + EigenLayer
+- `yieldnest-liquidity` — DEX depth + slippage for Risk Radar
+- `yieldnest-governance` — YND supply + delegations
+
+## Dev
 
 ```bash
-cd apps/explorer-web
 npm install
 npm run dev
+# opens http://localhost:5173
 ```
 
-Opens at `http://127.0.0.1:5173`. The app expects a Willow API at `http://127.0.0.1:3031` by default (configurable in the header).
+Set the Willow node URL via `VITE_WILLOW_NODE` env (defaults to the managed
+endpoint at api.willow.tech).
 
-To run against a real node, start one from the repo root:
+## Status
 
-```bash
-cargo run --bin willow-validator
-```
-
-## Panels
-
-### Data
-Fetch a single `(subgrove_id, key)` pair with optional trustless proof verification. When verification is on, surfaces:
-- A green `✓ proof verified` badge
-- The computed root hash (copy-pastable `<code>`)
-- The proof size in bytes
-- Timing breakdown: fetch data / fetch proof / verify
-- A collapsible view of the raw proof hex
-
-Verification flow: manual `GET /data/:sub/:key` + `GET /proof/:sub/:key`, then `verifyGroveDBProof(hexToBytes(proofHex))` from `@willow/sdk/grovedb`. Timing comes out of `performance.now()` so you can see exactly how much time goes into each step.
-
-### Query
-Runs `POST /query/:subgrove` with optional JSON filters and a limit. Same verification model as Data — inline proof in the response, pure-TS verification, result count and proof hex surfaced.
-
-### Subgroves
-Lists subgroves from `GET /subgroves`. **Click any row to jump to the Data panel with the subgrove id pre-filled** — saves you from copy-pasting during exploration.
-
-### State
-Compares the node's reported `/state/root-hash` against the CometBFT-verified `/state/root-hash/verified`. Shows a green `✓ roots match` when they agree, a `⚠ roots differ` warning when they don't, and pulls block height / chain id / last block time from CometBFT's `/status` when reachable.
-
-### Proof Inspector
-Paste any `GroveDBProof` hex and the pure-TS verifier decodes it, renders the layer tree (root → subgrove → data → leaf), shows per-layer merk proof sizes, lists every proven (path, key, value) triple, and computes the root hash. Click **Load sample** to try the fixture shipped with the SDK's round-trip tests — its known root hash is `aa068d6ce417b8f333ae37d5b2a15d76758db1e55e91c28d9a0be5bd495e36c4`.
-
-This panel needs no backend. Everything runs client-side. It's the clearest demo of "the entire verifier runs in your browser, byte-exact with Rust."
-
-## Theming
-
-Light and dark mode via the ☀/☾ toggle in the header. Respects `prefers-color-scheme` on first visit, then persists your choice to `localStorage`. All colors are CSS variables scoped to `[data-theme="light"]` / `[data-theme="dark"]` in `src/styles.css` — easy to customize.
-
-## Tests
-
-```bash
-# Unit + build type-check
-npm run typecheck
-
-# Full e2e suite in headless Chromium (40 tests)
-npm run test:e2e
-
-# Interactive Playwright UI
-npm run test:e2e:ui
-```
-
-### What the e2e suite covers
-
-- **`app.spec.ts`** — app shell renders, all tabs visible, theme toggle flips and persists, aria roles correct, tab switching shows expected headings.
-- **`inspector.spec.ts`** — loads a real Rust-generated fixture proof, runs it through `decodeGroveDBProof` + `verifyGroveDBProof` in the browser, asserts the computed root hash matches the known-good Rust value **byte-for-byte**, verifies the 3-layer tree is rendered, confirms garbage/malformed/empty inputs are rejected with specific errors.
-- **`data.spec.ts`** — verified + unverified fetch flows against mocked APIs, 404 handling, validation of empty inputs.
-- **`panels.spec.ts`** — subgroves populated/empty/error, state panel matching/mismatching roots, query panel happy path + invalid JSON filter, connection bar health check ok + error, subgrove click-through.
-- **`screenshots.spec.ts`** — captures every panel in both themes. Not assertions; writes PNGs to `screenshots/dark/` and `screenshots/light/` for visual review.
-
-### Why this level of testing matters for a verifier
-
-The Proof Inspector test is the critical one: it boots a real Chromium via Playwright, navigates to the app, pastes a real `GroveDBProof` that was generated by Rust's `GroveDb::prove_query` in `crates/storage/tests/generate_ts_fixtures.rs`, runs the full TS decoder + Merk executor + BLAKE3 hash pipeline, and asserts the computed root hash is exactly `aa068d6ce417b8f333ae37d5b2a15d76758db1e55e91c28d9a0be5bd495e36c4`. If one byte of the bincode 2 decoder, Merk proof executor, hash functions, or layered verification logic were wrong, that assertion would fail. It's an end-to-end test of the entire trust-critical path, in a real browser.
-
-## Screenshots
-
-`npm run test:e2e -- screenshots.spec.ts` regenerates `screenshots/{dark,light}/` with all 6 panel states. These are not committed — gitignore them or commit them as visual regression baselines, your call.
-
-## Dependencies
-
-- **`@willow/sdk`** is linked via `file:../../sdk/willow-typescript`. If you edit the SDK:
-  1. `cd sdk/willow-typescript && npm run build`
-  2. `cd apps/explorer-web && rm -rf node_modules/@willow/sdk && npm install`
-  3. Vite HMR picks up the new dist on next save
-- **`react` / `react-dom`** — 18.3
-- **`vite`** — 5.4
-- **`@playwright/test`** — 1.59 (dev only)
-
-No Tailwind, no component library, no state manager, no router. Vanilla React + CSS variables keeps the bundle small (160KB gzipped including the whole TS verifier).
-
-## Running against a real devnet
-
-```bash
-# Build the node binary
-cargo build --bin willow-validator
-
-# Start a single node
-./scripts/start_node.sh
-
-# In another terminal, start the explorer
-cd apps/explorer-web && npm run dev
-```
-
-### Known issue: serde_derive build error
-
-If `cargo build` fails with type-inference errors in `serde_derive 1.0.227`, your installed nightly Rust is too new. The project needs `nightly-2025-05-17` (already installed via rustup on this machine). Force it with:
-
-```bash
-cargo +nightly-2025-05-17 build --bin willow-validator
-```
-
-Or add `channel = "nightly-2025-05-17"` to `rust-toolchain.toml`. The `rust-toolchain.toml` currently just says `nightly` (unpinned), so you pick up whatever the system's latest nightly is, and the latest 1.94 nightly has a type-inference regression that breaks `serde_derive 1.0.227` compilation. Pinning fixes it.
-
-## What's deferred
-
-- Transaction signing / writes (storing new data)
-- File upload/download
-- Historical checkpoint queries
-- ERC-8004 agent browsing
-- Reputation / validator views
-- GKR-proved queries (would call the new server-side `POST /verify-gkr-proof` endpoint)
-- Web Worker isolation for verification (benchmarked at ~3 ms for small proofs, main thread is fine until subgrove-scale)
-- A real wallet / key management flow (currently pins to `DEVNET_TEST_ACCOUNT`)
-- React Router (single-page tab switcher is fine for v1)
+Pages scaffolded with placeholders; next step is wiring each panel to
+`@willow/sdk` queries against the live subgroves once the registration
+transactions land.
