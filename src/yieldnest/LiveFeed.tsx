@@ -1,0 +1,47 @@
+import { useDeposits, Deposit, assetsNumberHeuristic } from "./useDeposits";
+import { ProofBadge } from "./ProofBadge";
+
+export function LiveFeed({ subgrove }: { subgrove: string }) {
+  const s = useDeposits(subgrove);
+  const latest: Deposit[] =
+    s.status === "ok"
+      ? [...s.deposits].sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber)).slice(0, 12)
+      : [];
+  return (
+    <div className="yn-card" style={{ gridColumn: "span 2" }}>
+      <h3>Live deposit feed</h3>
+      <div className="sub" style={{ marginBottom: 12 }}>
+        streaming from <code>{subgrove}</code> · new rows arrive as the indexer decodes them
+      </div>
+      {s.status === "loading" && <p className="yn-placeholder">waiting for first batch…</p>}
+      {s.status === "error" && <p className="yn-placeholder">error: {s.message}</p>}
+      {s.status === "ok" && latest.length === 0 && (
+        <p className="yn-placeholder">no entities yet</p>
+      )}
+      {s.status === "ok" && latest.length > 0 && (
+        <table className="yn-table">
+          <thead>
+            <tr>
+              <th>Block</th>
+              <th>Depositor</th>
+              <th>Assets</th>
+              <th>Proof</th>
+            </tr>
+          </thead>
+          <tbody>
+            {latest.map(d => (
+              <tr key={d.id}>
+                <td>{d.blockNumber}</td>
+                <td style={{ fontFamily: "monospace", fontSize: 12 }}>
+                  {d.owner ? `${d.owner.slice(0, 10)}…${d.owner.slice(-6)}` : "—"}
+                </td>
+                <td>{assetsNumberHeuristic(d).toFixed(4)}</td>
+                <td><ProofBadge subgrove={subgrove} entityType="deposit" entityId={d.id} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
