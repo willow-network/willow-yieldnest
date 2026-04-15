@@ -19,7 +19,7 @@ full JSON response.
 
 ## Subgroves consumed
 
-Configs live in the private `willow-yieldnest` repo. This app queries:
+Configs live in the sibling `../protocol/` directory. This app queries:
 
 - `yieldnest-vaults-eth` / `-bnb` / `-l2` — vault events (Deposit / Withdraw / Transfer)
 - `yieldnest-restaking-eth` — StakingNodesManager, RewardsDistributor, EL/CL receivers
@@ -36,8 +36,8 @@ npm run dev
 # http://127.0.0.1:5273
 ```
 
-A local Willow node + indexer must be running (see the `willow-yieldnest`
-repo's `bringup_demo.sh`). The dev server proxies:
+A local Willow node + indexer must be running (see
+`../protocol/scripts/bringup_demo.sh`). The dev server proxies:
 
 | path              | → target                     | why                                   |
 |-------------------|------------------------------|---------------------------------------|

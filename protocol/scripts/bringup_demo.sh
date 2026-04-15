@@ -3,8 +3,9 @@
 set -euo pipefail
 
 YN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# The core willow repo is expected as a sibling clone.
-WILLOW_ROOT="$(cd "$YN_ROOT/../willow" && pwd)"
+# The core willow repo is expected as a sibling clone of willow-yieldnest.
+# Path: willow-yieldnest/protocol/scripts/bringup_demo.sh → ../../../willow
+WILLOW_ROOT="$(cd "$YN_ROOT/../../willow" && pwd)"
 NODE_URL="http://localhost:26657"
 API_URL="http://localhost:3031"
 

@@ -34,6 +34,10 @@ struct Args {
     root: Option<PathBuf>,
     #[arg(long)]
     dry_run: bool,
+    /// Instead of registering, fund each already-registered subgrove with
+    /// this many whole WILL tokens. Example: --fund-all 10000 = 10k WILL each.
+    #[arg(long)]
+    fund_all: Option<u128>,
 }
 
 #[derive(Deserialize)]
@@ -259,6 +263,47 @@ async fn main() -> Result<()> {
             (stored.did, stored.public_key_id, sk, Some(stored.did_document))
         };
 
+    if let Some(will_whole) = args.fund_all {
+        let amount = will_whole.saturating_mul(1_000_000_000_000_000_000);
+        println!("YieldNest subgrove funding");
+        println!("  node:   {}", args.node);
+        println!("  api:    {}", args.api);
+        println!("  from:   {}", owner_did);
+        println!("  amount: {will_whole} WILL per subgrove ({amount} base units)");
+        println!("  files:  {}", entries.len());
+        println!();
+
+        for path in entries {
+            let raw = std::fs::read_to_string(&path)?;
+            let mf: ManifestFile = serde_json::from_str(&raw)
+                .with_context(|| format!("parse {}", path.display()))?;
+            let sg_id = mf.subgrove_id;
+            if args.dry_run {
+                println!("[dry-run] would fund {sg_id} with {will_whole} WILL");
+                continue;
+            }
+            println!("→ funding {sg_id} ...");
+            let req = willow_sdk::types::FundSubgroveRequest {
+                subgrove_id: sg_id.clone(),
+                amount,
+                from_did: owner_did.clone(),
+                signature: Vec::new(),
+                public_key_id: public_key_id.clone(),
+                nonce: 0,
+            };
+            match client.fund_subgrove(req, &signing_key).await {
+                Ok(tx) => {
+                    println!("  tx: {tx}");
+                    // Wait for commit so the next tx fetches a fresh nonce.
+                    let _ = client.wait_for_transaction(&tx, 10).await;
+                }
+                Err(e) => return Err(anyhow!("fund {sg_id} failed: {e}")),
+            }
+        }
+        println!("\nDone.");
+        return Ok(());
+    }
+
     println!("YieldNest subgrove registration");
     println!("  node:  {}", args.node);
     println!("  api:   {}", args.api);
@@ -308,6 +353,8 @@ async fn main() -> Result<()> {
             .await
             .with_context(|| format!("register {sg_id}"))?;
         println!("  tx: {tx}");
+        // Wait for commit so the next tx fetches a fresh nonce.
+        let _ = client.wait_for_transaction(&tx, 10).await;
     }
 
     println!("\nDone.");

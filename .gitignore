@@ -3,11 +3,24 @@ target/
 Cargo.lock
 
 # Local indexer state (grovedb files, logs)
-indexer/grovedb/
-indexer/*.log
+protocol/indexer/grovedb/
+protocol/indexer/*.log
 
 # Persisted demo DID + key (generated at first bringup)
 **/did.json
+
+# dashboard/ — Vite + Node build artefacts
+dashboard/node_modules/
+dashboard/dist/
+dashboard/tsconfig.tsbuildinfo
+dashboard/playwright-report/
+dashboard/test-results/
+dashboard/screenshots/
+
+# Env files — keep .env.example tracked, real secrets in .env.local
+.env
+.env.local
+.env.*.local
 
 # Editor / OS
 .DS_Store

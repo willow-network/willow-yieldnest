@@ -1,11 +1,11 @@
-# willow-yieldnest
+# willow-yieldnest / protocol
 
-Private partner configuration for YieldNest × Willow.
+Private partner configuration for YieldNest × Willow (subgroves, schemas,
+bringup scripts, indexer config). The dashboard that consumes these
+subgroves lives in the sibling `../dashboard/` directory.
 
 Companion to:
-- **`willow-network/willow`** — core protocol
-- **`willow-network/yieldnest-willow-dashboard`** — YieldNest-branded UI that
-  consumes these subgroves
+- **`willow-network/willow`** — core protocol (expected as a sibling clone)
 
 ## Layout
 
@@ -51,7 +51,7 @@ RPC support in Willow.
   --config ./indexer/indexer.toml
 
 # in another shell — start the dashboard:
-cd ../yieldnest-willow-dashboard
+cd ../dashboard
 cp .env.example .env.local   # paste Alchemy key
 npm install && npm run dev
 # http://127.0.0.1:5273
