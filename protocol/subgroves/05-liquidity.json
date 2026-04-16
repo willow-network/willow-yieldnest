@@ -8,7 +8,7 @@
       "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "75000000000000000" },
       "manifest": {
         "chain_id": 1,
-        "start_block": 24830000,
+        "start_block": 24790000,
         "contracts": [
           { "name": "CurveYnethWsteth", "address": "0x0000000000000000000000000000000000000000", "abi": "CurvePool" }
         ],

@@ -8,7 +8,7 @@
       "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "50000000000000000" },
       "manifest": {
         "chain_id": 1,
-        "start_block": 24830000,
+        "start_block": 24790000,
         "contracts": [
           { "name": "YND", "address": "0x7159cc276D7d17Ab4b3bEb19959E1F39368a45Ba", "abi": "ERC20Votes" }
         ],

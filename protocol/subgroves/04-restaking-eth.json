@@ -8,7 +8,7 @@
       "indexer_config": { "min_indexers": 3, "reward_rate_per_block": "150000000000000000" },
       "manifest": {
         "chain_id": 1,
-        "start_block": 24830000,
+        "start_block": 24790000,
         "contracts": [
           { "name": "StakingNodesManager",    "address": "0x8C33A1d6d062dB7b51f79702355771d44359cD7d" },
           { "name": "RewardsDistributor",     "address": "0x40d5FF3E218f54f4982661a0464a298Cf6652351" },

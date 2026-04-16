@@ -4,6 +4,7 @@ Cargo.lock
 
 # Local indexer state (grovedb files, logs)
 protocol/indexer/grovedb/
+protocol/indexer/subgrove_dbs/
 protocol/indexer/*.log
 
 # Persisted demo DID + key (generated at first bringup)
