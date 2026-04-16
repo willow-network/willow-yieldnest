@@ -2,6 +2,7 @@ import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
 import { ProofBadge } from "../yieldnest/ProofBadge";
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
+import { PageSizeSelector, DEFAULT_PAGE_SIZE, type PageSize } from "../yieldnest/PageSize";
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar,
   CartesianGrid, XAxis, YAxis, Tooltip,
@@ -25,15 +26,16 @@ const tooltipStyle = {
   fontSize: 12,
 };
 
-function useGovernanceTransfers(): State {
+function useGovernanceTransfers(pageSize: PageSize): State {
   const [s, setS] = useState<State>({ status: "loading" });
   useEffect(() => {
     let alive = true;
+    setS({ status: "loading" });
     const tick = async () => {
       try {
         const d = await runQuery<{ transfers: Transfer[] }>(
           "yieldnest-governance",
-          `{ transfers(first: 5000) { id from to value blockNumber } }`,
+          `{ transfers(first: ${pageSize}) { id from to value blockNumber } }`,
         );
         if (!alive) return;
         setS({ status: "ok", transfers: d.transfers ?? [] });
@@ -46,7 +48,7 @@ function useGovernanceTransfers(): State {
     tick();
     const id = setInterval(tick, 6000);
     return () => { alive = false; clearInterval(id); };
-  }, []);
+  }, [pageSize]);
   return s;
 }
 
@@ -61,7 +63,8 @@ function short(addr: string) {
 }
 
 export function Governance() {
-  const s = useGovernanceTransfers();
+  const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
+  const s = useGovernanceTransfers(pageSize);
   const xfers = s.status === "ok" ? s.transfers : [];
 
   // Net balance per address (accounts for mint/burn via the zero address).
@@ -103,7 +106,10 @@ export function Governance() {
 
   return (
     <section>
-      <h1 style={{ marginTop: 0 }}>Governance</h1>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <h1 style={{ marginTop: 0 }}>Governance</h1>
+        <PageSizeSelector value={pageSize} onChange={setPageSize} />
+      </div>
       <p><SubgroveStatus id="yieldnest-governance" /></p>
       <p className="yn-placeholder">
         YND governance token activity — decoded by Willow from Ethereum mainnet transfer logs

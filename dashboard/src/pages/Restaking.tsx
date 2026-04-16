@@ -1,6 +1,7 @@
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
+import { PageSizeSelector, DEFAULT_PAGE_SIZE, type PageSize } from "../yieldnest/PageSize";
 import {
   ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip,
 } from "recharts";
@@ -12,15 +13,23 @@ type State =
   | { status: "ok"; transfers: Transfer[] }
   | { status: "error"; message: string };
 
-function useRestakingTransfers(): State {
+function useRestakingTransfers(pageSize: PageSize): State {
   const [s, setS] = useState<State>({ status: "loading" });
   useEffect(() => {
     let alive = true;
+    // Reset to loading when the window size changes so the UI doesn't
+    // keep showing stale numbers against the old window.
+    setS({ status: "loading" });
     const tick = async () => {
       try {
+        // Restaking activity = yn* vault-token movements (people receiving/
+        // moving ynETH, ynLSDe, ynETHx, etc. shares after depositing ETH).
+        // The `yieldnest-restaking-eth` subgrove covers lifecycle events
+        // (StakingNodeCreated, ValidatorRegistered) that are too rare to
+        // populate a dashboard in a demo window.
         const d = await runQuery<{ transfers: Transfer[] }>(
-          "yieldnest-restaking-eth",
-          `{ transfers(first: 5000) { id from to value blockNumber } }`,
+          "yieldnest-vaults-eth",
+          `{ transfers(first: ${pageSize}) { id from to value blockNumber } }`,
         );
         if (!alive) return;
         setS({ status: "ok", transfers: d.transfers ?? [] });
@@ -33,7 +42,7 @@ function useRestakingTransfers(): State {
     tick();
     const id = setInterval(tick, 6000);
     return () => { alive = false; clearInterval(id); };
-  }, []);
+  }, [pageSize]);
   return s;
 }
 
@@ -42,7 +51,8 @@ function weiToEth(s: string): number {
 }
 
 export function Restaking() {
-  const s = useRestakingTransfers();
+  const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
+  const s = useRestakingTransfers(pageSize);
   const xfers = s.status === "ok" ? s.transfers : [];
   const totalVolume = xfers.reduce((n, t) => n + weiToEth(t.value), 0);
   const uniqueAddrs = new Set<string>();
@@ -65,23 +75,27 @@ export function Restaking() {
 
   return (
     <section>
-      <h1 style={{ marginTop: 0 }}>Restaking</h1>
-      <p><SubgroveStatus id="yieldnest-restaking-eth" /></p>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <h1 style={{ marginTop: 0 }}>Restaking</h1>
+        <PageSizeSelector value={pageSize} onChange={setPageSize} />
+      </div>
+      <p><SubgroveStatus id="yieldnest-vaults-eth" /></p>
       <p className="yn-placeholder">
-        StakingNodesManager, RewardsDistributor, and EL/CL receivers — decoded by Willow from
-        Ethereum mainnet.
+        Transfer activity on YieldNest vault tokens (ynETH, ynLSDe, ynETHx, ynUSDx, ynRWAx) —
+        decoded by Willow from Ethereum mainnet. Each transfer represents a restaking share
+        moving between holders.
       </p>
 
       <div className="yn-grid" style={{ marginTop: 24 }}>
         <div className="yn-card">
           <h3>Transfer events</h3>
           <div className="big">{s.status === "ok" ? xfers.length.toLocaleString() : "—"}</div>
-          <div className="sub">on restaking contracts</div>
+          <div className="sub">on yn* vault tokens</div>
         </div>
         <div className="yn-card">
           <h3>Total volume moved</h3>
           <div className="big">{totalVolume.toFixed(2)}</div>
-          <div className="sub">ETH-scale (18-decimal tokens)</div>
+          <div className="sub">aggregate share units (18-decimal)</div>
         </div>
         <div className="yn-card">
           <h3>Unique addresses</h3>

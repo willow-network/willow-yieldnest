@@ -71,16 +71,10 @@ export function ProofViewer({ subgrove, entityType, entityIdField, entityId, onC
         {s.status === "ok" && s.proof && (
           <>
             <div className="yn-grid" style={{ marginTop: 16, gridTemplateColumns: "1fr 1fr" }}>
-              <div>
+              <div style={{ gridColumn: "1 / -1" }}>
                 <div className="sub">State root</div>
                 <div style={{ fontFamily: "monospace", fontSize: 11, wordBreak: "break-all" }}>
                   {bytesToHex(s.proof.state_root)}
-                </div>
-              </div>
-              <div>
-                <div className="sub">Block height</div>
-                <div style={{ fontFamily: "monospace", fontSize: 13 }}>
-                  {s.proof.block_height.toLocaleString()}
                 </div>
               </div>
               <div>
@@ -109,10 +103,8 @@ export function ProofViewer({ subgrove, entityType, entityIdField, entityId, onC
             >{s.raw}</pre>
 
             <p className="sub" style={{ marginTop: 16 }}>
-              The indexer signed this state root at block{" "}
-              <strong>{s.proof.block_height.toLocaleString()}</strong> and submitted it to Willow
-              consensus. Any client can re-verify the GroveDB path against the state root without
-              trusting the indexer.
+              The indexer signed this state root and submitted it to Willow consensus. Any client
+              can re-verify the GroveDB path against the state root without trusting the indexer.
             </p>
           </>
         )}
