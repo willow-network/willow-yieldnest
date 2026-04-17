@@ -1,5 +1,6 @@
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
 import { ProofBadge } from "../yieldnest/ProofBadge";
+import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
 import { PageSizeSelector, DEFAULT_PAGE_SIZE, type PageSize } from "../yieldnest/PageSize";
@@ -88,7 +89,6 @@ export function Governance() {
     short: short(addr),
     balance: Number(balance.toFixed(2)),
   }));
-  const netSupplyMoved = mintedOutOfZero - burnedIntoZero;
   const totalVolume = xfers.reduce((n, t) => n + weiToYnd(t.value), 0);
   const latestBlock = xfers.reduce((m, t) => Math.max(m, Number(t.blockNumber)), 0);
 
@@ -195,8 +195,8 @@ export function Governance() {
               {recent.map(t => (
                 <tr key={t.id}>
                   <td>{t.blockNumber}</td>
-                  <td style={{ fontFamily: "monospace", fontSize: 12 }}>{short(t.from)}</td>
-                  <td style={{ fontFamily: "monospace", fontSize: 12 }}>{short(t.to)}</td>
+                  <td><CopyAddress addr={t.from} /></td>
+                  <td><CopyAddress addr={t.to} /></td>
                   <td>{weiToYnd(t.value).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
                   <td><ProofBadge subgrove="yieldnest-governance" entityType="transfer" entityId={t.id} /></td>
                 </tr>

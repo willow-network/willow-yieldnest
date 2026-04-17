@@ -10,14 +10,16 @@ declare global {
   interface Window { ethereum?: EthereumProvider }
 }
 
+const DISCONNECTED_KEY = "yn-wallet-disconnected";
+
 export function useWallet() {
   const [addr, setAddr] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const available = typeof window !== "undefined" && !!window.ethereum;
 
-  // Pick up an already-authorised account on mount without prompting.
   useEffect(() => {
     if (!available) return;
+    if (sessionStorage.getItem(DISCONNECTED_KEY)) return;
     window.ethereum!
       .request({ method: "eth_accounts" })
       .then((accs: string[]) => {
@@ -25,7 +27,10 @@ export function useWallet() {
       })
       .catch(() => { /* ignore */ });
 
-    const onChange = (accs: string[]) => setAddr(accs?.[0] ?? null);
+    const onChange = (accs: string[]) => {
+      if (sessionStorage.getItem(DISCONNECTED_KEY)) return;
+      setAddr(accs?.[0] ?? null);
+    };
     window.ethereum?.on?.("accountsChanged", onChange);
     return () => window.ethereum?.removeListener?.("accountsChanged", onChange);
   }, [available]);
@@ -33,6 +38,7 @@ export function useWallet() {
   const connect = useCallback(async () => {
     if (!window.ethereum) { setError("No EVM wallet detected"); return; }
     try {
+      sessionStorage.removeItem(DISCONNECTED_KEY);
       const accs: string[] = await window.ethereum.request({ method: "eth_requestAccounts" });
       if (accs?.[0]) { setAddr(accs[0]); setError(null); }
     } catch (e: any) {
@@ -40,7 +46,10 @@ export function useWallet() {
     }
   }, []);
 
-  const disconnect = useCallback(() => setAddr(null), []);
+  const disconnect = useCallback(() => {
+    sessionStorage.setItem(DISCONNECTED_KEY, "1");
+    setAddr(null);
+  }, []);
 
   return { available, addr, error, connect, disconnect };
 }

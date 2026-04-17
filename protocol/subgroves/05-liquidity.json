@@ -10,7 +10,7 @@
         "chain_id": 1,
         "start_block": 24790000,
         "contracts": [
-          { "name": "CurveYnethWsteth", "address": "0x0000000000000000000000000000000000000000", "abi": "CurvePool" }
+          { "name": "CurveYnethWsteth", "address": "0x19b8524665abac613d82ece5d8347ba44c714bdd", "abi": "CurvePool" }
         ],
         "events": [
           "Swap(address,uint256,uint256,uint256,uint256,address)",

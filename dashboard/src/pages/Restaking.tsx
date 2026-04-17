@@ -1,4 +1,6 @@
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
+import { SampleProofBadge } from "../yieldnest/SampleProofBadge";
+import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
 import { PageSizeSelector, DEFAULT_PAGE_SIZE, type PageSize } from "../yieldnest/PageSize";
@@ -57,7 +59,6 @@ export function Restaking() {
   const totalVolume = xfers.reduce((n, t) => n + weiToEth(t.value), 0);
   const uniqueAddrs = new Set<string>();
   for (const t of xfers) { uniqueAddrs.add(t.from); uniqueAddrs.add(t.to); }
-  const latestBlock = xfers.reduce((m, t) => Math.max(m, Number(t.blockNumber)), 0);
 
   const sorted = [...xfers].sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber));
   let cum = 0;
@@ -139,9 +140,9 @@ export function Restaking() {
               <tbody>
                 {topSenders.map(([addr, vol]) => (
                   <tr key={addr}>
-                    <td style={{ fontFamily: "monospace", fontSize: 12 }}>{addr.slice(0, 10)}…{addr.slice(-6)}</td>
+                    <td><CopyAddress addr={addr} /></td>
                     <td>{vol.toFixed(4)}</td>
-                    <td><span className="yn-proof-badge" title="Aggregate across many transfers; click a row on Portfolio or LiveFeed for a per-event proof.">Willow verified</span></td>
+                    <td><SampleProofBadge subgrove="yieldnest-vaults-eth" entityTypes={["transfer"]} /></td>
                   </tr>
                 ))}
               </tbody>

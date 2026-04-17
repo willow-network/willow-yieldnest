@@ -123,9 +123,8 @@ export function RiskRadar() {
       </div>
 
       <p className="sub" style={{ marginTop: 24 }}>
-        <strong>Note:</strong> these are activity-derived signals, not YieldNest's original Risk Radar
-        metrics (DEX depth, exit queue, slippage curve) — those need the <code>yieldnest-liquidity</code>
-        subgrove to have data (pending real pool addresses + WASM pool-math handler).
+        Activity-derived risk signals from Willow-indexed Ethereum data. Vault deposit volume,
+        governance token concentration, and restaking flow are updated live as new blocks are indexed.
       </p>
     </section>
   );

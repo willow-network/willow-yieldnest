@@ -4,13 +4,10 @@ import { ProofBadge } from "../yieldnest/ProofBadge";
 import { useAddressActivity } from "../yieldnest/useAddressActivity";
 import { assetsNumberHeuristic } from "../yieldnest/useDeposits";
 import { useWallet } from "../yieldnest/useWallet";
+import { CopyAddress } from "../yieldnest/CopyAddress";
 
 function fmtAssets(s: string): string {
   return assetsNumberHeuristic({ assets: s, shares: "0" } as any).toFixed(4);
-}
-
-function short(addr: string): string {
-  return `${addr.slice(0, 10)}…${addr.slice(-6)}`;
 }
 
 export function Portfolio() {
@@ -55,12 +52,23 @@ export function Portfolio() {
             padding: "10px 14px", fontSize: 14, fontFamily: "monospace",
           }}
         />
+        <button
+          onClick={() => {/* addr state already drives the hook — this is a UX hint */}}
+          disabled={!/^0x[a-fA-F0-9]{40}$/.test(addr)}
+          style={{
+            background: /^0x[a-fA-F0-9]{40}$/.test(addr) ? "var(--yn-accent)" : "var(--yn-border)",
+            color: /^0x[a-fA-F0-9]{40}$/.test(addr) ? "#fff" : "var(--yn-text-dim)",
+            border: "none", borderRadius: 8,
+            padding: "10px 16px", fontSize: 14, fontWeight: 600,
+            cursor: /^0x[a-fA-F0-9]{40}$/.test(addr) ? "pointer" : "default",
+          }}
+        >Load</button>
         {wallet.available && !wallet.addr && (
           <button
             onClick={wallet.connect}
             style={{
-              background: "var(--yn-accent)", color: "#fff",
-              border: "none", borderRadius: 8,
+              background: "transparent", color: "var(--yn-accent)",
+              border: "1px solid var(--yn-accent)", borderRadius: 8,
               padding: "10px 16px", fontSize: 14, fontWeight: 600, cursor: "pointer",
             }}
           >Connect Wallet</button>
@@ -137,7 +145,7 @@ export function Portfolio() {
                     .map(d => (
                       <tr key={d.id}>
                         <td>{d.blockNumber}</td>
-                        <td style={{ fontFamily: "monospace", fontSize: 12 }}>{short(d.caller)}</td>
+                        <td><CopyAddress addr={d.caller} /></td>
                         <td>{fmtAssets(d.assets)}</td>
                         <td>{fmtAssets(d.shares)}</td>
                         <td><ProofBadge subgrove="yieldnest-vaults-eth" entityType="deposit" entityId={d.id} /></td>
@@ -161,7 +169,7 @@ export function Portfolio() {
                     .map(w => (
                       <tr key={w.id}>
                         <td>{w.blockNumber}</td>
-                        <td style={{ fontFamily: "monospace", fontSize: 12 }}>{short(w.receiver)}</td>
+                        <td><CopyAddress addr={w.receiver} /></td>
                         <td>{fmtAssets(w.assets)}</td>
                         <td>{fmtAssets(w.shares)}</td>
                         <td><ProofBadge subgrove="yieldnest-vaults-eth" entityType="withdraw" entityId={w.id} /></td>

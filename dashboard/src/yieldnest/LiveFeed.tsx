@@ -1,5 +1,6 @@
 import { useDeposits, Deposit, assetsNumberHeuristic } from "./useDeposits";
 import { ProofBadge } from "./ProofBadge";
+import { CopyAddress } from "./CopyAddress";
 
 export function LiveFeed({ subgrove }: { subgrove: string }) {
   const s = useDeposits(subgrove);
@@ -32,8 +33,8 @@ export function LiveFeed({ subgrove }: { subgrove: string }) {
             {latest.map(d => (
               <tr key={d.id}>
                 <td>{d.blockNumber}</td>
-                <td style={{ fontFamily: "monospace", fontSize: 12 }}>
-                  {d.owner ? `${d.owner.slice(0, 10)}…${d.owner.slice(-6)}` : "—"}
+                <td>
+                  {d.owner ? <CopyAddress addr={d.owner} /> : "—"}
                 </td>
                 <td>{assetsNumberHeuristic(d).toFixed(4)}</td>
                 <td><ProofBadge subgrove={subgrove} entityType="deposit" entityId={d.id} /></td>
