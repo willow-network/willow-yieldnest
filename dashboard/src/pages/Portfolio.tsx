@@ -94,7 +94,8 @@ export function Portfolio() {
 
       {activity.status === "idle" && (
         <p className="yn-placeholder" style={{ marginTop: 16 }}>
-          Try one from the Earn page's top depositors — e.g. paste the full address of a row there.
+          Paste any Ethereum address or connect your wallet to view YieldNest vault activity.
+          Try copying an address from the Governance or Restaking tables.
         </p>
       )}
 
