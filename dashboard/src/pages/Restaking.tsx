@@ -102,11 +102,6 @@ export function Restaking() {
           <div className="big">{uniqueAddrs.size}</div>
           <div className="sub">either side of a transfer</div>
         </div>
-        <div className="yn-card">
-          <h3>Latest block</h3>
-          <div className="big">{latestBlock || "—"}</div>
-          <div className="sub">furthest indexed block</div>
-        </div>
       </div>
 
       <div className="yn-grid" style={{ marginTop: 24, gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))" }}>

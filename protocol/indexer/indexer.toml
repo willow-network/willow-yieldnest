@@ -21,14 +21,9 @@ storage_limit_gb = 100
 # Ethereum mainnet RPCs for YieldNest contracts. Public endpoints — rate-limited
 # but fine for a demo. For production swap in Alchemy/Infura URLs.
 eth_rpc_endpoints = [
-    # Publicnode first — unauthenticated, handles ~4 concurrent pipelines without
-    # 429s. Infura free tier cracks under concurrent load and its 429 response
-    # format breaks ethers' JSON-RPC deserializer, killing the pipeline (TODO:
-    # proper fallback rotation + 429 handling upstream in willow-network).
+    # Publicnode — unauthenticated, unlimited, handles concurrent pipelines.
+    # Infura/Alchemy removed: the fallback rotation (PR #134) round-robins
+    # to them whenever publicnode is slow, which burned through Infura's
+    # daily credit quota overnight. We don't need paid fallbacks for a demo.
     "https://ethereum.publicnode.com",
-    # Infura fallback — fine for single-pipeline load.
-    "https://mainnet.infura.io/v3/512ef33075a144119ab8c5af99d3491c",
-    # Alchemy free tier — 10-block hard limit on eth_getLogs but useful for
-    # single-block chain-tip polling and other small requests.
-    "https://eth-mainnet.g.alchemy.com/v2/_agm3fd1Cnk05G6p4owj3",
 ]

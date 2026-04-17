@@ -132,11 +132,6 @@ export function Governance() {
           <div className="big">{holdersWithPositiveBalance.length}</div>
           <div className="sub">net &gt; 0 YND across indexed blocks</div>
         </div>
-        <div className="yn-card">
-          <h3>Net minted</h3>
-          <div className="big">{netSupplyMoved.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-          <div className="sub">YND · mints − burns</div>
-        </div>
       </div>
 
       <div className="yn-grid" style={{ marginTop: 24, gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))" }}>

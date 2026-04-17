@@ -36,11 +36,6 @@ export function Earn() {
 
       <div className="yn-grid" style={{ marginBottom: 24 }}>
         <div className="yn-card">
-          <h3>Subgroves online</h3>
-          <div className="big">{s.status === "ok" ? s.subgroves.length : "—"}</div>
-          <div className="sub">{s.status === "loading" ? "…" : s.status === "error" ? s.message : "live on Willow"}</div>
-        </div>
-        <div className="yn-card">
           <h3>Deposits indexed</h3>
           <div className="big">{eth.status === "ok" ? count : eth.status === "loading" ? "…" : "—"}</div>
           <div className="sub">yieldnest-vaults-eth · block ≤ {latestBlock || "—"}</div>

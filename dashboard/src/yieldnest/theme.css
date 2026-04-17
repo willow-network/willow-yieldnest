@@ -82,6 +82,11 @@ body {
   color: var(--yn-text);
   box-shadow: 0 1px 2px rgba(44, 122, 92, 0.04);
 }
+[data-theme='light'] .yn-card {
+  background: linear-gradient(168deg, #ffffff 50%, #edf6f0 100%);
+  border-color: #aecfba;
+  box-shadow: 0 2px 8px rgba(44, 122, 92, 0.08), 0 0 0 1px rgba(44, 122, 92, 0.04);
+}
 .yn-card h3 { margin: 0 0 4px; font-size: 14px; color: var(--yn-accent); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
 .yn-card .big { font-size: 28px; font-weight: 700; color: var(--yn-text); }
 [data-theme='dark'] .yn-card h3 { color: var(--yn-text-dim); font-weight: 500; }
@@ -121,7 +126,7 @@ body {
 .yn-table th { color: var(--yn-accent); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
 [data-theme='dark'] .yn-table th { color: var(--yn-text-dim); font-weight: 500; }
 
-.yn-placeholder { color: var(--yn-text-dim); font-style: italic; }
+.yn-placeholder { color: var(--yn-text-dim); }
 
 .yn-theme-toggle {
   background: transparent;

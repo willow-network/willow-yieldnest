@@ -66,11 +66,6 @@ export function Overview() {
           <div className="sub">{s.status === "error" ? s.message : nodeUrl()}</div>
         </div>
         <div className="yn-card">
-          <h3>Subgroves registered</h3>
-          <div className="big">{s.status === "ok" ? s.subgroves.length : "—"}</div>
-          <div className="sub">expected 6</div>
-        </div>
-        <div className="yn-card">
           <h3>Total entities indexed</h3>
           <div className="big">{totalEntities.toLocaleString()}</div>
           <div className="sub">across all subgroves</div>
