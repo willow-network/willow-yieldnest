@@ -95,7 +95,7 @@ export function Portfolio() {
       {activity.status === "idle" && (
         <p className="yn-placeholder" style={{ marginTop: 16 }}>
           Paste any Ethereum address or connect your wallet to view YieldNest vault activity.
-          Try copying an address from the Governance or Restaking tables.
+          Try copying a depositor address from the Live deposit feed on Overview.
         </p>
       )}
 
