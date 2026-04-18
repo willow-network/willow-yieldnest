@@ -188,7 +188,14 @@ body {
   }
   .yn-grid > .yn-card { grid-column: auto !important; }
 
-  .yn-card { padding: 16px; border-radius: 12px; }
+  .yn-card {
+    padding: 16px;
+    border-radius: 12px;
+    /* min-width: 0 lets the card honor its 1fr grid track instead of
+       growing to fit min-content — without it, tables/charts inside
+       the card push the card past the viewport. */
+    min-width: 0;
+  }
   .yn-card .big { font-size: 24px; }
 
   .yn-table {
