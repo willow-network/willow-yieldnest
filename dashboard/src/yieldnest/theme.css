@@ -157,12 +157,22 @@ body {
     overflow-x: auto;
     flex-wrap: nowrap;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
     gap: 20px;
     margin: 4px -16px 0;
-    padding: 0 16px 2px;
+    padding: 0 16px 6px;
+    /* Thin scrollbar + right-edge fade together signal scrollability —
+       fade alone is invisible when the right edge falls inside a label gap. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--yn-border) transparent;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 28px, black calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, transparent, black 28px, black calc(100% - 28px), transparent);
   }
-  .yn-nav::-webkit-scrollbar { display: none; }
+  .yn-nav::-webkit-scrollbar { height: 3px; }
+  .yn-nav::-webkit-scrollbar-thumb {
+    background: var(--yn-border);
+    border-radius: 999px;
+  }
+  .yn-nav::-webkit-scrollbar-track { background: transparent; }
   .yn-nav a { flex: 0 0 auto; white-space: nowrap; }
 
   .yn-container { padding: 20px 16px; }
