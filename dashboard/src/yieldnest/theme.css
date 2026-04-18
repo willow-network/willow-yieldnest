@@ -153,6 +153,10 @@ body {
   .yn-powered { display: none; }
   .yn-nav {
     flex: 1 1 100%;
+    /* min-width: 0 — without this iOS Safari resolves the flex item's
+       implicit min-width to min-content (~570px for 6 nav links) and the
+       overflowing nav bleeds out as page-level horizontal scroll. */
+    min-width: 0;
     order: 2;
     overflow-x: auto;
     flex-wrap: nowrap;
