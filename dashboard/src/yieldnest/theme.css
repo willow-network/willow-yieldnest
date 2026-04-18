@@ -143,3 +143,45 @@ body {
   justify-content: center;
 }
 .yn-theme-toggle:hover { border-color: var(--yn-accent); color: var(--yn-accent); }
+
+@media (max-width: 768px) {
+  .yn-header {
+    padding: 14px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .yn-powered { display: none; }
+  .yn-nav {
+    flex: 1 1 100%;
+    order: 2;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 20px;
+    margin: 4px -16px 0;
+    padding: 0 16px 2px;
+  }
+  .yn-nav::-webkit-scrollbar { display: none; }
+  .yn-nav a { flex: 0 0 auto; white-space: nowrap; }
+
+  .yn-container { padding: 20px 16px; }
+
+  /* !important needed to beat inline `gridTemplateColumns` set per-page. */
+  .yn-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  .yn-grid > .yn-card { grid-column: auto !important; }
+
+  .yn-card { padding: 16px; border-radius: 12px; }
+  .yn-card .big { font-size: 24px; }
+
+  .yn-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .yn-table th, .yn-table td { padding: 10px 12px; }
+}
