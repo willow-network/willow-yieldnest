@@ -205,4 +205,7 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   .yn-table th, .yn-table td { padding: 10px 12px; }
+
+  /* iOS Safari auto-zooms on focus when input font-size < 16px. */
+  input, select, textarea { font-size: 16px !important; }
 }
