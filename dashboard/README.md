@@ -53,6 +53,29 @@ npm run build
 npm run typecheck
 ```
 
+## Deploy to yieldnest.willow.tech
+
+Static files are served from `/var/www/yieldnest/` on the EC2 host
+(`3.209.237.230`). Nginx routes `/willow-api/*` and `/indexer-gql/*` to
+the validator API (3031) and yieldnest indexer (3051) respectively, so
+the dashboard stays same-origin — no CORS needed.
+
+Deploy flow (from this directory):
+
+```bash
+VITE_WILLOW_API=/willow-api VITE_INDEXER_GQL=/indexer-gql npm run build
+rsync -azP dist/ ubuntu@3.209.237.230:/var/www/yieldnest/
+```
+
+The `VITE_*` env vars bake the same-origin proxy paths into the bundle.
+Never deploy with `VITE_WILLOW_API=https://api.willow.tech` — that hits
+cross-origin and breaks on CORS (and we explicitly don't want CORS
+headers on `api.willow.tech` because it breaks the main explorer).
+
+Nginx serves the new files immediately; hard-refresh the browser to
+clear the index.html cache (`Cache-Control: no-cache` prevents stale
+HTML but asset bundles are hashed so no conflict).
+
 ## Status
 
 All 6 pages render live data from the indexer. Next up:
