@@ -27,3 +27,14 @@ eth_rpc_endpoints = [
     # daily credit quota overnight. We don't need paid fallbacks for a demo.
     "https://ethereum.publicnode.com",
 ]
+
+# Per-chain RPC endpoints for non-Ethereum subgroves. Keys are EVM chain_ids.
+# Used by subgroves whose manifest specifies chain_id != 1.
+#
+# Non-Ethereum chains don't have Helios-equivalent light clients on the
+# validator, so submissions for these chains go through on the RPC-trusted
+# path (event_proofs skipped, indexer is trust anchor). The dashboard should
+# badge these rows as "RPC-verified" vs "beacon-chain-verified" for Ethereum.
+[rpc_endpoints_per_chain]
+# BNB Chain (chain_id 56) — ynBNB, ynBNBx, ynBTCk
+"56" = ["https://bsc.publicnode.com", "https://rpc.ankr.com/bsc"]

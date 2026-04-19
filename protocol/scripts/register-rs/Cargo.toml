@@ -17,5 +17,7 @@ anyhow        = "1"
 clap          = { version = "4", features = ["derive"] }
 ed25519-dalek = "2"
 hex           = "0.4"
+reqwest       = { version = "0.12", features = ["json"] }
+base64        = "0.22"
 
 [workspace]
