@@ -1,6 +1,6 @@
 {
   "subgrove_id": "yieldnest-liquidity",
-  "description": "DEX liquidity for yn* tokens — powers Risk Radar",
+  "description": "Ethereum DEX liquidity baseline (Uniswap V2 USDC/WETH) — live market activity alongside YieldNest vaults",
   "mode": {
     "BlockchainIndexing": {
       "execution_mode": "GkrExecution",
@@ -8,9 +8,9 @@
       "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "75000000000000000" },
       "manifest": {
         "chain_id": 1,
-        "start_block": 24790000,
+        "start_block": 24815000,
         "contracts": [
-          { "name": "CurveYnethWsteth", "address": "0x19b8524665abac613d82ece5d8347ba44c714bdd", "abi": "CurvePool" }
+          { "name": "UniswapV2USDCWETH", "address": "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc", "abi": "UniswapV2Pair" }
         ],
         "events": [
           "Swap(address,uint256,uint256,uint256,uint256,address)",
