@@ -653,17 +653,7 @@ async fn cmd_reset(args: &Args, subgrove: Option<String>) -> Result<()> {
                 // Block until commit so the next reset reads a fresh nonce.
                 let _ = client.wait_for_transaction(&tx, 10).await;
             }
-            Err(e) => {
-                // Be forgiving if the subgrove is already gone — this command
-                // is often used interactively and a "not found" shouldn't
-                // abort the remaining targets.
-                let msg = e.to_string();
-                if msg.contains("not found") || msg.contains("Not found") {
-                    println!("  already deregistered, skipping");
-                } else {
-                    return Err(anyhow!("deregister {sg_id} failed: {msg}"));
-                }
-            }
+            Err(e) => return Err(anyhow!("deregister {sg_id} failed: {e}")),
         }
     }
     println!("\nDone. Re-run `register` to redeploy with a fresh deployment_epoch.");
