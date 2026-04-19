@@ -398,11 +398,22 @@ async fn fetch_subgrove_info(
     }
 }
 
+/// On-chain SubgroveFunding record (narrow view — we only need balance).
+///
+/// `balance` is u128 on the validator side; parsing via `serde_json::Value`
+/// and `as_u64()` truncates values >u64::MAX (10k WILL at 10^18 base units
+/// = 10^22, which overflows). Typed parsing preserves full precision.
+#[derive(Deserialize)]
+struct FundingView {
+    #[serde(default)]
+    balance: u128,
+}
+
 async fn fetch_subgrove_funding(
     http: &reqwest::Client,
     node_url: &str,
     subgrove_id: &str,
-) -> Result<Option<Value>> {
+) -> Result<Option<FundingView>> {
     let bytes = abci_query(
         http,
         node_url,
@@ -721,8 +732,16 @@ async fn cmd_inspect(args: &Args, subgrove_id: String) -> Result<()> {
     }
     match funding {
         Some(f) => {
-            let balance = f.get("balance").and_then(|v| v.as_u64()).unwrap_or(0);
-            println!("  funding balance:   {balance} base units");
+            let whole = f.balance / 1_000_000_000_000_000_000u128;
+            let frac = f.balance % 1_000_000_000_000_000_000u128;
+            if frac == 0 {
+                println!("  funding balance:   {whole} WILL ({} base units)", f.balance);
+            } else {
+                println!(
+                    "  funding balance:   {whole}.{frac:018} WILL ({} base units)",
+                    f.balance
+                );
+            }
         }
         None => println!("  funding balance:   (no funding record)"),
     }
