@@ -128,6 +128,24 @@ struct Indexing {
     execution_mode: String,
     indexer_config: IndexerCfg,
     manifest: ManifestBody,
+    #[serde(default)]
+    template: Option<TemplateCfg>,
+}
+
+#[derive(Deserialize, Clone)]
+struct TemplateCfg {
+    template_id: String,
+    #[serde(default = "default_template_version")]
+    template_version: u32,
+    variant_id: String,
+    #[serde(default)]
+    parameters: std::collections::HashMap<String, serde_json::Value>,
+    #[serde(default)]
+    chain: Option<String>,
+}
+
+fn default_template_version() -> u32 {
+    1
 }
 #[derive(Deserialize)]
 struct IndexerCfg {
@@ -218,6 +236,31 @@ fn schema_file_for(subgrove_id: &str) -> &'static str {
     }
 }
 
+fn build_template_config(
+    cfg: &TemplateCfg,
+    contracts: &[ContractEntry],
+    events: &[String],
+) -> willow_sdk::types::TemplateSubgroveConfig {
+    let event_signatures: Vec<String> = events
+        .iter()
+        .map(|e| {
+            use sha3::{Digest, Keccak256};
+            let hash = Keccak256::digest(e.as_bytes());
+            format!("0x{}", hex::encode(hash))
+        })
+        .collect();
+    let contract_addresses: Vec<String> = contracts.iter().map(|c| c.address.clone()).collect();
+    willow_sdk::types::TemplateSubgroveConfig {
+        template_id: cfg.template_id.clone(),
+        template_version: cfg.template_version,
+        variant_id: cfg.variant_id.clone(),
+        parameters: cfg.parameters.clone(),
+        contracts: contract_addresses,
+        event_signatures,
+        chain: cfg.chain.clone(),
+    }
+}
+
 fn to_definition(m: ManifestFile, schema_src: String) -> Result<SubgroveDefinition> {
     let idx = m.mode.indexing;
     let reward_per_epoch = idx
@@ -237,7 +280,7 @@ fn to_definition(m: ManifestFile, schema_src: String) -> Result<SubgroveDefiniti
         .map(network_for)
         .unwrap_or("multi-chain");
 
-    for c in idx.manifest.contracts {
+    for c in &idx.manifest.contracts {
         let events = c
             .events
             .clone()
@@ -245,10 +288,10 @@ fn to_definition(m: ManifestFile, schema_src: String) -> Result<SubgroveDefiniti
         let abi = c.abi.clone().unwrap_or_else(|| "ERC20".into());
         data_sources.push(DataSourceDef {
             kind: "ethereum/contract".into(),
-            name: c.name,
+            name: c.name.clone(),
             network: network.into(),
             source: SourceDef {
-                address: c.address,
+                address: c.address.clone(),
                 abi,
                 start_block,
             },
@@ -299,6 +342,11 @@ fn to_definition(m: ManifestFile, schema_src: String) -> Result<SubgroveDefiniti
         }
     }
 
+    let template_config = idx
+        .template
+        .as_ref()
+        .map(|t| build_template_config(t, &idx.manifest.contracts, &idx.manifest.events));
+
     Ok(SubgroveDefinition {
         subgrove_id: m.subgrove_id,
         description: m.description,
@@ -317,6 +365,7 @@ fn to_definition(m: ManifestFile, schema_src: String) -> Result<SubgroveDefiniti
             description: "YieldNest dashboard indexing".into(),
             data_sources,
         },
+        template_config,
     })
 }
 

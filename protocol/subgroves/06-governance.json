@@ -8,7 +8,7 @@
       "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "50000000000000000" },
       "manifest": {
         "chain_id": 1,
-        "start_block": 24790000,
+        "start_block": 24900000,
         "contracts": [
           { "name": "YND", "address": "0x7159cc276D7d17Ab4b3bEb19959E1F39368a45Ba", "abi": "ERC20Votes" }
         ],
@@ -17,6 +17,37 @@
           "DelegateChanged(address,address,address)",
           "DelegateVotesChanged(address,uint256,uint256)"
         ]
+      },
+      "template": {
+        "template_id": "balance-aggregator-v2",
+        "template_version": 1,
+        "variant_id": "balance-aggregator-v2-fixed64",
+        "chain": "ethereum",
+        "parameters": {
+          "token_contract": "0x7159cc276D7d17Ab4b3bEb19959E1F39368a45Ba",
+          "tracked_addresses": [
+            "0x000000000004444c5dc75cb358380d2e3de08a90",
+            "0x63242a4ea82847b20e506b63b0e2e2eff0cc6cb0",
+            "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+            "0x4c3ccc98c01103be72bcfd29e1d2454c98d1a6e3",
+            "0x3ef3d8ba38ebe18db133cec108f4d14ce00dd9ae",
+            "0x9f2b20a772246960810045905b7daccf960ee288",
+            "0x163f3103de041d25464e2c8a4f8f3187ec1856e0",
+            "0x08a04bcd8442e8e55e0829864a983bbedd1cca82",
+            "0x000010036c0190e009a000d0fc3541100a07380a",
+            "0x66a9893cc07d91d95644aedd05d03f95e1dba8af",
+            "0xd666b56ee7786cc918fddceade542d013de0e4f1",
+            "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+            "0xcd6b980029e6e6e0733ac8ec3e02be9410d09799",
+            "0xff694e1ef8d2d534d40b69e4dba795f213fb2307",
+            "0x8e6f84d924cb70b67a3872f9ca4f99c851dc7d48",
+            "0x0079ce80043edc3325598e4a3b6293ab779bf174",
+            "0x706a1299a4a93b2c00dd932b238d9739d788be5d",
+            "0xe53f4d44c45dbc16a20ab64f8a8b4404ddbbefec",
+            "0xd6b8bbcd887f2ff49465e4624e11d2bbf42e1c41",
+            "0xb300000b72deaeb607a12d5f54773d1c19c7028d"
+          ]
+        }
       }
     }
   }
