@@ -34,3 +34,23 @@ export function getSubgrove(id: string): Promise<Subgrove> {
 }
 
 export const nodeUrl = () => NODE;
+
+// Indexer's REST surface (different origin than the validator REST API).
+const INDEXER = (import.meta as any).env?.VITE_INDEXER_GQL ?? "/indexer-gql";
+
+export type GkrStateBalance = { address: string; balance: string };
+
+export type GkrState = {
+  subgrove_id: string;
+  last_block: number;
+  output_root: string;
+  balances: GkrStateBalance[];
+  verification: string;
+};
+
+export async function getGkrState(subgroveId: string): Promise<GkrState | null> {
+  const r = await fetch(`${INDEXER}/gkr-state/${subgroveId}`);
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`/gkr-state/${subgroveId}: HTTP ${r.status}`);
+  return (await r.json()) as GkrState;
+}
