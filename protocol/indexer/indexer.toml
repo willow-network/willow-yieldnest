@@ -38,3 +38,11 @@ eth_rpc_endpoints = [
 [rpc_endpoints_per_chain]
 # BNB Chain (chain_id 56) — ynBNB, ynBNBx, ynBTCk
 "56" = ["https://bsc.publicnode.com", "https://rpc.ankr.com/bsc"]
+# Optimism (chain_id 10) — ynETHx_op, ynBTCk_op (vaults-l2 subgrove)
+"10" = ["https://optimism.publicnode.com", "https://mainnet.optimism.io"]
+# Arbitrum One (chain_id 42161) — future L2 mirror vaults
+"42161" = ["https://arbitrum-one.publicnode.com", "https://arb1.arbitrum.io/rpc"]
+# Base (chain_id 8453) — future Coinbase L2 mirror vaults
+"8453" = ["https://base.publicnode.com", "https://mainnet.base.org"]
+# Polygon (chain_id 137) — stablecoin / RWA products
+"137" = ["https://polygon-bor.publicnode.com", "https://polygon-rpc.com"]
