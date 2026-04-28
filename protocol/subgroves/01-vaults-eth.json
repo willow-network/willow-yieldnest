@@ -3,7 +3,7 @@
   "description": "YieldNest vault events on Ethereum — ynETH, ynLSDe, ynETHx, ynUSDx, ynRWAx",
   "mode": {
     "BlockchainIndexing": {
-      "execution_mode": "GkrExecution",
+      "execution_mode": "IndexerExecution",
       "retention_window": { "Blocks": 432000 },
       "indexer_config": { "min_indexers": 3, "reward_rate_per_block": "100000000000000000" },
       "manifest": {

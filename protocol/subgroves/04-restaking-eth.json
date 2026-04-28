@@ -3,7 +3,7 @@
   "description": "YieldNest native restaking: StakingNodesManager, RewardsDistributor, EL/CL receivers",
   "mode": {
     "BlockchainIndexing": {
-      "execution_mode": "GkrExecution",
+      "execution_mode": "IndexerExecution",
       "retention_window": { "Blocks": 1296000 },
       "indexer_config": { "min_indexers": 3, "reward_rate_per_block": "150000000000000000" },
       "manifest": {
