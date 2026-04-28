@@ -4,6 +4,7 @@ type StakingNodeCreated @entity {
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
+  contractAddress: String!
 }
 
 type ValidatorRegistered @entity {
@@ -12,6 +13,7 @@ type ValidatorRegistered @entity {
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
+  contractAddress: String!
 }
 
 type Transfer @entity {
@@ -22,4 +24,5 @@ type Transfer @entity {
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
+  contractAddress: String!
 }

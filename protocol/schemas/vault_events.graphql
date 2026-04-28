@@ -7,6 +7,7 @@ type Deposit @entity {
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
+  contractAddress: String!
 }
 
 type Withdraw @entity {
@@ -19,6 +20,7 @@ type Withdraw @entity {
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
+  contractAddress: String!
 }
 
 type Transfer @entity {
@@ -29,4 +31,5 @@ type Transfer @entity {
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
+  contractAddress: String!
 }

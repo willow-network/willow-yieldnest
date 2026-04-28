@@ -6,6 +6,7 @@ type Transfer @entity {
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
+  contractAddress: String!
 }
 
 type DelegateChanged @entity {
@@ -16,6 +17,7 @@ type DelegateChanged @entity {
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
+  contractAddress: String!
 }
 
 type DelegateVotesChanged @entity {
@@ -26,4 +28,5 @@ type DelegateVotesChanged @entity {
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
+  contractAddress: String!
 }
