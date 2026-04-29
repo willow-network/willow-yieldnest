@@ -16,9 +16,9 @@
           { "name": "ConsensusLayerReceiver", "address": "0xE439fe4563F7666FCd7405BEC24aE7B0d226536e" }
         ],
         "events": [
-          "StakingNodeCreated(uint256)",
-          "ValidatorRegistered(bytes)",
-          "Transfer(address,address,uint256)"
+          "TotalETHStakedUpdated(uint256)",
+          "RewardsProcessed(uint256,uint256,uint256,uint256,uint256)",
+          "EthWithdrawn(address,uint256)"
         ]
       }
     }

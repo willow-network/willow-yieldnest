@@ -8,7 +8,7 @@
       "indexer_config": { "min_indexers": 3, "reward_rate_per_block": "100000000000000000" },
       "manifest": {
         "chain_id": 56,
-        "start_block": 93420000,
+        "start_block": 95230000,
         "contracts": [
           { "name": "ynBNB",  "address": "0x304B5845b9114182ECb4495Be4C91a273b74B509", "abi": "ERC4626" },
           { "name": "ynBNBx", "address": "0x32C830f5c34122C6afB8aE87ABA541B7900a2C5F", "abi": "ERC4626" },
