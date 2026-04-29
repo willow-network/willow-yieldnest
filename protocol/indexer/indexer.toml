@@ -36,9 +36,9 @@ eth_rpc_endpoints = [
 # path (event_proofs skipped, indexer is trust anchor). The dashboard should
 # badge these rows as "RPC-verified" vs "beacon-chain-verified" for Ethereum.
 [rpc_endpoints_per_chain]
-# BNB Chain (chain_id 56) — ynBNB, ynBNBx, ynBTCk. 48.club first because
-# it's archive-capable; publicnode prunes ~50-100k blocks deep.
-"56" = ["https://rpc-bsc.48.club", "https://bsc.publicnode.com", "https://rpc.ankr.com/bsc"]
+# BNB Chain (chain_id 56) — ynBNB, ynBNBx, ynBTCk. bloXroute first
+# (archive-capable from us-east-1); publicnode/Ankr as fallback.
+"56" = ["https://bsc.rpc.blxrbdn.com", "https://bsc.publicnode.com", "https://rpc.ankr.com/bsc"]
 # Optimism (chain_id 10) — ynETHx_op, ynBTCk_op (vaults-l2 subgrove)
 "10" = ["https://optimism.publicnode.com", "https://mainnet.optimism.io"]
 # Arbitrum One (chain_id 42161) — future L2 mirror vaults
