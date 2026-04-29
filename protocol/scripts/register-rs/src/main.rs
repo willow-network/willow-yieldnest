@@ -250,11 +250,17 @@ fn build_template_config(
         })
         .collect();
     let contract_addresses: Vec<String> = contracts.iter().map(|c| c.address.clone()).collect();
+    // SDK migrated `parameters` from `HashMap<String, Value>` to a
+    // JSON-encoded `Vec<u8>` (#248 bincode wire format work). Encode
+    // the manifest's HashMap to bytes so the consensus tx carries the
+    // same payload byte-for-byte.
+    let parameters_bytes: Vec<u8> = serde_json::to_vec(&cfg.parameters)
+        .unwrap_or_else(|_| b"{}".to_vec());
     willow_sdk::types::TemplateSubgroveConfig {
         template_id: cfg.template_id.clone(),
         template_version: cfg.template_version,
         variant_id: cfg.variant_id.clone(),
-        parameters: cfg.parameters.clone(),
+        parameters: parameters_bytes,
         contracts: contract_addresses,
         event_signatures,
         chain: cfg.chain.clone(),

@@ -1,26 +1,29 @@
-type StakingNodeCreated @entity {
+type TotalETHStakedUpdated @entity {
   id: ID!
-  nodeId: BigInt!
+  totalETHStaked: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
   contractAddress: String!
 }
 
-type ValidatorRegistered @entity {
+type RewardsProcessed @entity {
   id: ID!
-  pubkey: String!
+  totalRewards: BigInt!
+  elRewards: BigInt!
+  clRewards: BigInt!
+  netRewards: BigInt!
+  fees: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
   contractAddress: String!
 }
 
-type Transfer @entity {
+type EthWithdrawn @entity {
   id: ID!
-  from: String!
   to: String!
-  value: BigInt!
+  amount: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   transactionHash: String!
