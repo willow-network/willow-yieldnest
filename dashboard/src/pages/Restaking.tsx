@@ -8,24 +8,10 @@ import {
   ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip,
 } from "recharts";
 
+type Transfer = { id: string; from: string; to: string; value: string; blockNumber: string };
 type StakedUpdate = { id: string; totalETHStaked: string; blockNumber: string };
-type RewardsProcessed = {
-  id: string; totalRewards: string; elRewards: string; clRewards: string;
-  netRewards: string; fees: string; blockNumber: string;
-};
-type EthWithdrawn = { id: string; to: string; amount: string; blockNumber: string };
 
-type Data = {
-  staked: StakedUpdate[];
-  rewards: RewardsProcessed[];
-  withdrawals: EthWithdrawn[];
-};
-
-type RawData = {
-  totalETHStakedUpdateds?: StakedUpdate[];
-  rewardsProcesseds?: RewardsProcessed[];
-  ethWithdrawns?: EthWithdrawn[];
-};
+type Data = { transfers: Transfer[]; staked: StakedUpdate[] };
 
 type State =
   | { status: "loading" }
@@ -38,29 +24,44 @@ function useRestakingData(pageSize: PageSize): State {
     let alive = true;
     setS({ status: "loading" });
     const tick = async () => {
+      // Two subgroves feed this page:
+      //   - vaults-eth: ynETH/ynLSDe/ynETHx/ynUSDx/ynRWAx Transfer events —
+      //     populates the volume/sender tables (the actual restaking-share
+      //     movements users care about)
+      //   - restaking-eth: StakingNodesManager TotalETHStakedUpdated —
+      //     authoritative ETH-currently-staked snapshot, drives the chart
+      //
+      // RewardsProcessed/EthWithdrawn from the restaking subgrove are
+      // intentionally omitted: the contracts emit zero-value harvest
+      // sweeps frequently and would just noise up the tables.
       try {
-        const q = `{
-          totalETHStakedUpdateds(first: ${pageSize}) { id totalETHStaked blockNumber }
-          rewardsProcesseds(first: ${pageSize}) { id totalRewards elRewards clRewards netRewards fees blockNumber }
-          ethWithdrawns(first: ${pageSize}) { id to amount blockNumber }
-        }`;
-        const d = await runQuery<RawData>("yieldnest-restaking-eth", q);
+        const [vaults, restaking] = await Promise.all([
+          runQuery<{ transfers: Transfer[] }>(
+            "yieldnest-vaults-eth",
+            `{ transfers(first: ${pageSize}) { id from to value blockNumber } }`,
+          ).catch(e => {
+            if (e instanceof NoIndexingProgressError) return { transfers: [] };
+            throw e;
+          }),
+          runQuery<{ totalETHStakedUpdateds: StakedUpdate[] }>(
+            "yieldnest-restaking-eth",
+            `{ totalETHStakedUpdateds(first: ${pageSize}) { id totalETHStaked blockNumber } }`,
+          ).catch(e => {
+            if (e instanceof NoIndexingProgressError) return { totalETHStakedUpdateds: [] };
+            throw e;
+          }),
+        ]);
         if (!alive) return;
         setS({
           status: "ok",
           data: {
-            staked: d.totalETHStakedUpdateds ?? [],
-            rewards: d.rewardsProcesseds ?? [],
-            withdrawals: d.ethWithdrawns ?? [],
+            transfers: vaults.transfers ?? [],
+            staked: restaking.totalETHStakedUpdateds ?? [],
           },
         });
       } catch (e) {
         if (!alive) return;
-        if (e instanceof NoIndexingProgressError) {
-          setS({ status: "ok", data: { staked: [], rewards: [], withdrawals: [] } });
-        } else {
-          setS({ status: "error", message: String(e) });
-        }
+        setS({ status: "error", message: String(e) });
       }
     };
     tick();
@@ -77,33 +78,41 @@ function weiToEth(s: string): number {
 export function Restaking() {
   const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
   const s = useRestakingData(pageSize);
-  const data = s.status === "ok" ? s.data : { staked: [], rewards: [], withdrawals: [] };
+  const xfers = s.status === "ok" ? s.data.transfers : [];
+  const staked = s.status === "ok" ? s.data.staked : [];
+
+  const totalVolume = xfers.reduce((n, t) => n + weiToEth(t.value), 0);
+  const uniqueAddrs = new Set<string>();
+  for (const t of xfers) { uniqueAddrs.add(t.from); uniqueAddrs.add(t.to); }
+
+  const sortedXfers = [...xfers].sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber));
+  let cum = 0;
+  const cumData = sortedXfers.map(t => {
+    cum += weiToEth(t.value);
+    return { block: Number(t.blockNumber), cumulative: Number(cum.toFixed(4)) };
+  });
 
   const latestTotalStakedEth = (() => {
-    if (data.staked.length === 0) return 0;
-    const sorted = [...data.staked].sort(
+    if (staked.length === 0) return 0;
+    const sorted = [...staked].sort(
       (a, b) => Number(b.blockNumber) - Number(a.blockNumber),
     );
     return weiToEth(sorted[0].totalETHStaked);
   })();
 
-  const totalRewardsEth = data.rewards.reduce((n, r) => n + weiToEth(r.totalRewards), 0);
-  const totalWithdrawnEth = data.withdrawals.reduce((n, w) => n + weiToEth(w.amount), 0);
-
-  const stakedSeries = [...data.staked]
+  const stakedSeries = [...staked]
     .sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber))
     .map(u => ({
       block: Number(u.blockNumber),
       totalETHStaked: Number(weiToEth(u.totalETHStaked).toFixed(4)),
     }));
 
-  const recentRewards = [...data.rewards]
-    .sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber))
-    .slice(0, 5);
-
-  const recentWithdrawals = [...data.withdrawals]
-    .sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber))
-    .slice(0, 5);
+  const topSenders = Object.entries(
+    xfers.reduce<Record<string, number>>((acc, t) => {
+      acc[t.from] = (acc[t.from] ?? 0) + weiToEth(t.value);
+      return acc;
+    }, {}),
+  ).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   return (
     <section>
@@ -111,28 +120,36 @@ export function Restaking() {
         <h1 style={{ marginTop: 0 }}>Restaking</h1>
         <PageSizeSelector value={pageSize} onChange={setPageSize} />
       </div>
-      <p><SubgroveStatus id="yieldnest-restaking-eth" /></p>
+      <p>
+        <SubgroveStatus id="yieldnest-restaking-eth" />{" "}
+        <SubgroveStatus id="yieldnest-vaults-eth" />
+      </p>
       <p className="yn-placeholder">
-        Native ETH restaking activity from YieldNest's StakingNodesManager,
-        RewardsDistributor, and EigenLayer/Consensus reward receivers — decoded
-        by Willow from Ethereum mainnet.
+        Native ETH staked across YieldNest's StakingNodesManager (authoritative
+        snapshot) plus restaking-share movements on vault tokens (ynETH, ynLSDe,
+        ynETHx, ynUSDx, ynRWAx) — both decoded from Ethereum mainnet by Willow.
       </p>
 
       <div className="yn-grid" style={{ marginTop: 24 }}>
         <div className="yn-card">
           <h3>Total ETH staked</h3>
           <div className="big">{s.status === "ok" ? latestTotalStakedEth.toFixed(2) : "—"}</div>
-          <div className="sub">latest snapshot from StakingNodesManager</div>
+          <div className="sub">latest StakingNodesManager snapshot</div>
         </div>
         <div className="yn-card">
-          <h3>Rewards processed</h3>
-          <div className="big">{s.status === "ok" ? data.rewards.length.toLocaleString() : "—"}</div>
-          <div className="sub">{totalRewardsEth.toFixed(4)} ETH distributed</div>
+          <h3>Share transfers</h3>
+          <div className="big">{s.status === "ok" ? xfers.length.toLocaleString() : "—"}</div>
+          <div className="sub">on yn* vault tokens</div>
         </div>
         <div className="yn-card">
-          <h3>Withdrawals</h3>
-          <div className="big">{s.status === "ok" ? data.withdrawals.length.toLocaleString() : "—"}</div>
-          <div className="sub">{totalWithdrawnEth.toFixed(4)} ETH withdrawn</div>
+          <h3>Total volume moved</h3>
+          <div className="big">{totalVolume.toFixed(2)}</div>
+          <div className="sub">aggregate share units (18-decimal)</div>
+        </div>
+        <div className="yn-card">
+          <h3>Unique addresses</h3>
+          <div className="big">{uniqueAddrs.size}</div>
+          <div className="sub">either side of a transfer</div>
         </div>
       </div>
 
@@ -157,49 +174,49 @@ export function Restaking() {
           ) : (
             <p className="yn-placeholder">no staking-update events yet</p>
           )}
-          <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
+          <div style={{ marginTop: 10 }}>
+            <SampleProofBadge subgrove="yieldnest-restaking-eth" entityTypes={["totalETHStakedUpdated"]} />
+          </div>
         </div>
 
         <div className="yn-card">
-          <h3>Recent rewards distributions</h3>
-          <div className="sub" style={{ marginBottom: 12 }}>RewardsProcessed: EL + CL split, fees taken</div>
-          {recentRewards.length === 0 ? (
-            <p className="yn-placeholder">no rewards events yet</p>
+          <h3>Cumulative share-transfer volume</h3>
+          <div className="sub" style={{ marginBottom: 12 }}>summed transfer value over block height</div>
+          {s.status === "ok" && cumData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="block" stroke="var(--yn-text-dim)" fontSize={11}
+                       tickFormatter={(v) => v.toLocaleString()} />
+                <YAxis stroke="var(--yn-text-dim)" fontSize={11} />
+                <Tooltip
+                  contentStyle={{ background: "var(--yn-surface)", border: "1px solid var(--yn-border)", borderRadius: 8, color: "var(--yn-text)", fontSize: 12 }}
+                  labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`}
+                />
+                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
           ) : (
-            <table className="yn-table">
-              <thead><tr><th>Block</th><th>Total</th><th>EL</th><th>CL</th><th>Fees</th><th>Proof</th></tr></thead>
-              <tbody>
-                {recentRewards.map(r => (
-                  <tr key={r.id}>
-                    <td>{Number(r.blockNumber).toLocaleString()}</td>
-                    <td>{weiToEth(r.totalRewards).toFixed(4)}</td>
-                    <td>{weiToEth(r.elRewards).toFixed(4)}</td>
-                    <td>{weiToEth(r.clRewards).toFixed(4)}</td>
-                    <td>{weiToEth(r.fees).toFixed(4)}</td>
-                    <td><SampleProofBadge subgrove="yieldnest-restaking-eth" entityTypes={["rewardsProcessed"]} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <p className="yn-placeholder">no transfer events yet</p>
           )}
+          <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
         </div>
       </div>
 
       <div className="yn-card" style={{ marginTop: 24 }}>
-        <h3>Recent withdrawals</h3>
-        <div className="sub" style={{ marginBottom: 12 }}>EthWithdrawn from EigenLayer / Consensus receivers</div>
-        {recentWithdrawals.length === 0 ? (
-          <p className="yn-placeholder">no withdrawal events yet</p>
+        <h3>Largest senders</h3>
+        <div className="sub" style={{ marginBottom: 12 }}>top 5 addresses by share-token outflow</div>
+        {topSenders.length === 0 ? (
+          <p className="yn-placeholder">no data yet</p>
         ) : (
           <table className="yn-table">
-            <thead><tr><th>Block</th><th>To</th><th>Amount (ETH)</th><th>Proof</th></tr></thead>
+            <thead><tr><th>Address</th><th>Volume</th><th>Proof</th></tr></thead>
             <tbody>
-              {recentWithdrawals.map(w => (
-                <tr key={w.id}>
-                  <td>{Number(w.blockNumber).toLocaleString()}</td>
-                  <td><CopyAddress addr={w.to} /></td>
-                  <td>{weiToEth(w.amount).toFixed(4)}</td>
-                  <td><SampleProofBadge subgrove="yieldnest-restaking-eth" entityTypes={["ethWithdrawn"]} /></td>
+              {topSenders.map(([addr, vol]) => (
+                <tr key={addr}>
+                  <td><CopyAddress addr={addr} /></td>
+                  <td>{vol.toFixed(4)}</td>
+                  <td><SampleProofBadge subgrove="yieldnest-vaults-eth" entityTypes={["transfer"]} /></td>
                 </tr>
               ))}
             </tbody>
