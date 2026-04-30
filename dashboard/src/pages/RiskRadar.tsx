@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
 import { useDeposits, assetsNumberHeuristic } from "../yieldnest/useDeposits";
+import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
 import {
   ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   Radar, Tooltip, Legend,
@@ -11,9 +13,35 @@ function norm(v: number, cap: number): number {
   return Math.min(100, Math.round((v / cap) * 100));
 }
 
+/** restaking-eth doesn't index Deposits; count TotalETHStakedUpdated events
+ *  as the activity proxy for the radar's "Restaking flow" axis. */
+function useRestakingActivity(): number {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    const tick = async () => {
+      try {
+        const d = await runQuery<{ totalETHStakedUpdateds: { id: string }[] }>(
+          "yieldnest-restaking-eth",
+          `{ totalETHStakedUpdateds(first: 5000) { id } }`,
+        );
+        if (!alive) return;
+        setN(d.totalETHStakedUpdateds?.length ?? 0);
+      } catch (e) {
+        if (!alive) return;
+        if (e instanceof NoIndexingProgressError) setN(0);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 5000);
+    return () => { alive = false; clearInterval(id); };
+  }, []);
+  return n;
+}
+
 export function RiskRadar() {
   const eth = useDeposits("yieldnest-vaults-eth");
-  const restaking = useDeposits("yieldnest-restaking-eth"); // reused for activity metrics
+  const restakeVol = useRestakingActivity();
 
   const depositsEth = eth.status === "ok" ? eth.deposits : [];
 
@@ -45,9 +73,6 @@ export function RiskRadar() {
     const spread = 1 - topOwnerShare; // higher = more decentralised
     // Recency: blocks since the last deposit vs a 1000-block horizon. Newer = higher.
     const ageBlocks = Math.max(0, (latestBlock + 50) - latestBlock);
-    const restakeVol = restaking.status === "ok"
-      ? restaking.deposits.length // proxy; restaking subgrove indexes Transfers, not deposits
-      : 0;
 
     return [
       { axis: "Deposit activity",  value: norm(depositsEth.length, 1000) },

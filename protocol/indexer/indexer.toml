@@ -18,6 +18,19 @@ grovedb_visualizer_port = 10310
 max_concurrent_indexing = 6
 storage_limit_gb = 100
 
+# Whitelist: keep this indexer focused on the six yieldnest subgroves so
+# the marketplace doesn't pull in unrelated subgroves (e.g. test
+# subgroves on the same chain) and squeeze one of them out at the
+# `max_concurrent_indexing = 6` cap.
+subgrove_filter = [
+    "yieldnest-vaults-eth",
+    "yieldnest-vaults-bnb",
+    "yieldnest-vaults-l2",
+    "yieldnest-restaking-eth",
+    "yieldnest-liquidity",
+    "yieldnest-governance",
+]
+
 # Ethereum mainnet RPCs for YieldNest contracts. Public endpoints — rate-limited
 # but fine for a demo. For production swap in Alchemy/Infura URLs.
 eth_rpc_endpoints = [
