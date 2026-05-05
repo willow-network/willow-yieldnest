@@ -4,11 +4,11 @@
   "mode": {
     "BlockchainIndexing": {
       "execution_mode": "IndexerExecution",
-      "retention_window": { "Blocks": 432000 },
+      "retention_window": "Indefinite",
       "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "75000000000000000" },
       "manifest": {
         "chain_id": 1,
-        "start_block": 24815000,
+        "start_block": 19800000,
         "contracts": [
           { "name": "UniswapV2USDCWETH", "address": "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc", "abi": "UniswapV2Pair" }
         ],
