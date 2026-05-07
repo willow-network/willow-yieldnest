@@ -21,13 +21,11 @@ use clap::{Parser, Subcommand};
 use ed25519_dalek::SigningKey;
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use willow_sdk::auth::{generate_did, DidInfo};
 use willow_sdk::consensus::ConsensusClient;
-use willow_sdk::subgrove_config::{
-    DataSourceDef, EventHandlerDef, IndexerConfigDef, ManifestDef, MappingDef, SourceDef,
-    SubgroveDefinition,
-};
+use willow_sdk::subgrove_config::{IndexerConfigDef, SubgroveDefinition, WillowManifest};
 use willow_sdk::types::SignatureAlgorithm;
 
 #[derive(Parser, Debug)]
@@ -127,7 +125,7 @@ struct Mode {
 struct Indexing {
     execution_mode: String,
     indexer_config: IndexerCfg,
-    manifest: ManifestBody,
+    manifest: WillowManifest,
     #[serde(default)]
     template: Option<TemplateCfg>,
 }
@@ -152,28 +150,6 @@ struct IndexerCfg {
     min_indexers: u8,
     #[serde(default)]
     reward_rate_per_block: Option<String>,
-}
-#[derive(Deserialize)]
-struct ManifestBody {
-    #[serde(default)]
-    chain_id: Option<u64>,
-    #[serde(default)]
-    start_block: Option<u64>,
-    #[serde(default)]
-    contracts: Vec<ContractEntry>,
-    #[serde(default)]
-    deployments: Vec<serde_json::Value>,
-    #[serde(default)]
-    events: Vec<String>,
-}
-#[derive(Deserialize, Clone)]
-struct ContractEntry {
-    name: String,
-    address: String,
-    #[serde(default)]
-    abi: Option<String>,
-    #[serde(default)]
-    events: Option<Vec<String>>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -214,18 +190,6 @@ fn load_or_create_did(did_file: &Path) -> Result<StoredDid> {
     Ok(stored)
 }
 
-fn network_for(chain_id: u64) -> &'static str {
-    match chain_id {
-        1 => "mainnet",
-        10 => "optimism",
-        56 => "bnb",
-        137 => "polygon",
-        8453 => "base",
-        42161 => "arbitrum-one",
-        _ => "unknown",
-    }
-}
-
 fn schema_file_for(subgrove_id: &str) -> &'static str {
     match subgrove_id {
         s if s.starts_with("yieldnest-vaults-") => "vault_events.graphql",
@@ -238,24 +202,35 @@ fn schema_file_for(subgrove_id: &str) -> &'static str {
 
 fn build_template_config(
     cfg: &TemplateCfg,
-    contracts: &[ContractEntry],
-    events: &[String],
+    manifest: &WillowManifest,
 ) -> willow_sdk::types::TemplateSubgroveConfig {
-    let event_signatures: Vec<String> = events
+    use sha3::{Digest, Keccak256};
+    // Dedupe across data_sources — the canonical schema duplicates the
+    // shared event list per-source, but the template circuit only needs
+    // each unique signature once.
+    let unique_events: BTreeSet<&str> = manifest
+        .data_sources
+        .iter()
+        .flat_map(|ds| ds.events.iter().map(|e| e.as_str()))
+        .collect();
+    let event_signatures: Vec<String> = unique_events
         .iter()
         .map(|e| {
-            use sha3::{Digest, Keccak256};
             let hash = Keccak256::digest(e.as_bytes());
             format!("0x{}", hex::encode(hash))
         })
         .collect();
-    let contract_addresses: Vec<String> = contracts.iter().map(|c| c.address.clone()).collect();
+    let contract_addresses: Vec<String> = manifest
+        .data_sources
+        .iter()
+        .map(|ds| ds.address.to_canonical_string())
+        .collect();
     // SDK migrated `parameters` from `HashMap<String, Value>` to a
     // JSON-encoded `Vec<u8>` (#248 bincode wire format work). Encode
     // the manifest's HashMap to bytes so the consensus tx carries the
     // same payload byte-for-byte.
-    let parameters_bytes: Vec<u8> = serde_json::to_vec(&cfg.parameters)
-        .unwrap_or_else(|_| b"{}".to_vec());
+    let parameters_bytes: Vec<u8> =
+        serde_json::to_vec(&cfg.parameters).unwrap_or_else(|_| b"{}".to_vec());
     willow_sdk::types::TemplateSubgroveConfig {
         template_id: cfg.template_id.clone(),
         template_version: cfg.template_version,
@@ -278,80 +253,10 @@ fn to_definition(m: ManifestFile, schema_src: String) -> Result<SubgroveDefiniti
         .context("reward_rate_per_block parse")?
         .unwrap_or(100_000_000_000_000_000);
 
-    let mut data_sources = Vec::new();
-    let start_block = idx.manifest.start_block.unwrap_or(0);
-    let network = idx
-        .manifest
-        .chain_id
-        .map(network_for)
-        .unwrap_or("multi-chain");
-
-    for c in &idx.manifest.contracts {
-        let events = c
-            .events
-            .clone()
-            .unwrap_or_else(|| idx.manifest.events.clone());
-        let abi = c.abi.clone().unwrap_or_else(|| "ERC20".into());
-        data_sources.push(DataSourceDef {
-            kind: "ethereum/contract".into(),
-            name: c.name.clone(),
-            network: network.into(),
-            source: SourceDef {
-                address: c.address.clone(),
-                abi,
-                start_block,
-            },
-            mapping: MappingDef {
-                event_handlers: events
-                    .into_iter()
-                    .map(|e| EventHandlerDef {
-                        event: e.clone(),
-                        handler: format!("handle{e}"),
-                    })
-                    .collect(),
-            },
-        });
-    }
-
-    if data_sources.is_empty() && !idx.manifest.deployments.is_empty() {
-        for (i, d) in idx.manifest.deployments.iter().enumerate() {
-            data_sources.push(DataSourceDef {
-                kind: "ethereum/contract".into(),
-                name: format!("deployment_{i}"),
-                network: d
-                    .get("name")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("unknown")
-                    .into(),
-                source: SourceDef {
-                    address: d
-                        .get("ynETHx")
-                        .or_else(|| d.get("address"))
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("0x0")
-                        .into(),
-                    abi: "ERC4626".into(),
-                    start_block: 0,
-                },
-                mapping: MappingDef {
-                    event_handlers: idx
-                        .manifest
-                        .events
-                        .iter()
-                        .map(|e| EventHandlerDef {
-                            event: e.clone(),
-                            handler: format!("handle{e}"),
-                        })
-                        .collect(),
-                },
-            });
-        }
-    }
-
     let template_config = idx
         .template
         .as_ref()
-        .map(|t| build_template_config(t, &idx.manifest.contracts, &idx.manifest.events));
+        .map(|t| build_template_config(t, &idx.manifest));
 
     Ok(SubgroveDefinition {
         subgrove_id: m.subgrove_id,
@@ -366,11 +271,7 @@ fn to_definition(m: ManifestFile, schema_src: String) -> Result<SubgroveDefiniti
             min_indexer_stake: 100_000_000_000_000_000_000_000,
         },
         schema: schema_src,
-        manifest: ManifestDef {
-            spec_version: "0.1.0".into(),
-            description: "YieldNest dashboard indexing".into(),
-            data_sources,
-        },
+        manifest: idx.manifest,
         template_config,
     })
 }
@@ -790,7 +691,10 @@ async fn cmd_inspect(args: &Args, subgrove_id: String) -> Result<()> {
             let whole = f.balance / 1_000_000_000_000_000_000u128;
             let frac = f.balance % 1_000_000_000_000_000_000u128;
             if frac == 0 {
-                println!("  funding balance:   {whole} WILL ({} base units)", f.balance);
+                println!(
+                    "  funding balance:   {whole} WILL ({} base units)",
+                    f.balance
+                );
             } else {
                 println!(
                     "  funding balance:   {whole}.{frac:018} WILL ({} base units)",
@@ -832,18 +736,33 @@ fn build_local_view(path: &Path, schemas_dir: &Path) -> Result<LocalManifestView
     let schema_src = std::fs::read_to_string(&schema_path)
         .with_context(|| format!("read schema {}", schema_path.display()))?;
     let idx = &mf.mode.indexing;
-    let network = idx
+    // The earliest start_block across all data sources; matches what
+    // `IndexerRegistry::deploy_subgrove` writes into `source_start_block`.
+    let start_block = idx
         .manifest
-        .chain_id
-        .map(network_for)
-        .unwrap_or("multi-chain")
-        .to_string();
-    let start_block = idx.manifest.start_block.unwrap_or(0);
+        .data_sources
+        .iter()
+        .map(|ds| ds.start_block)
+        .min()
+        .unwrap_or(0);
+    // The set of distinct networks the manifest targets. Multi-chain
+    // manifests render as comma-joined ids.
+    let networks: BTreeSet<String> = idx
+        .manifest
+        .data_sources
+        .iter()
+        .map(|ds| ds.network.canonical_id().to_string())
+        .collect();
+    let network = if networks.is_empty() {
+        "(none)".to_string()
+    } else {
+        networks.into_iter().collect::<Vec<_>>().join(",")
+    };
     let contracts: Vec<String> = idx
         .manifest
-        .contracts
+        .data_sources
         .iter()
-        .map(|c| c.address.clone())
+        .map(|ds| ds.address.to_canonical_string())
         .collect();
     Ok(LocalManifestView {
         subgrove_id: mf.subgrove_id,

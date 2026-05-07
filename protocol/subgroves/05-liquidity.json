@@ -7,15 +7,20 @@
       "retention_window": "Indefinite",
       "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "75000000000000000" },
       "manifest": {
-        "chain_id": 1,
-        "start_block": 19800000,
-        "contracts": [
-          { "name": "UniswapV2USDCWETH", "address": "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc", "abi": "UniswapV2Pair" }
-        ],
-        "events": [
-          "Swap(address,uint256,uint256,uint256,uint256,address)",
-          "Mint(address,uint256,uint256)",
-          "Burn(address,uint256,uint256,address)"
+        "spec_version": "1.0.0",
+        "data_sources": [
+          {
+            "name": "UniswapV2USDCWETH",
+            "network": "mainnet",
+            "address": "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc",
+            "abi": "UniswapV2Pair",
+            "start_block": 19800000,
+            "events": [
+              "Swap(address,uint256,uint256,uint256,uint256,address)",
+              "Mint(address,uint256,uint256)",
+              "Burn(address,uint256,uint256,address)"
+            ]
+          }
         ]
       }
     }
