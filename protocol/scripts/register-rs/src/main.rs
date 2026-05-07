@@ -232,6 +232,7 @@ fn schema_file_for(subgrove_id: &str) -> &'static str {
         "yieldnest-restaking-eth" => "restaking_events.graphql",
         "yieldnest-liquidity" => "liquidity_events.graphql",
         "yieldnest-governance" => "governance_events.graphql",
+        s if s.starts_with("uniswap-v3-") => "swap_events.graphql",
         _ => "vault_events.graphql",
     }
 }
