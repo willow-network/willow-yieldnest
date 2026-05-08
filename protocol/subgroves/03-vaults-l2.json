@@ -7,16 +7,32 @@
       "retention_window": { "Blocks": 864000 },
       "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "50000000000000000" },
       "manifest": {
-        "chain_id": 10,
-        "start_block": 130900000,
-        "contracts": [
-          { "name": "ynETHx_op",   "address": "0xE231DB5F348d709239Ef1741EA30961B3B635a61", "abi": "ERC4626" },
-          { "name": "ynBTCk_op",   "address": "0x68589adc7687A23Ff2B06fb032b997f09B44Ed5d", "abi": "ERC4626" }
-        ],
-        "events": [
-          "Deposit(address,address,uint256,uint256)",
-          "Withdraw(address,address,address,uint256,uint256)",
-          "Transfer(address,address,uint256)"
+        "spec_version": "1.0.0",
+        "data_sources": [
+          {
+            "name": "ynETHx_op",
+            "network": "optimism",
+            "address": "0xE231DB5F348d709239Ef1741EA30961B3B635a61",
+            "abi": "ERC4626",
+            "start_block": 130900000,
+            "events": [
+              "Deposit(address,address,uint256,uint256)",
+              "Withdraw(address,address,address,uint256,uint256)",
+              "Transfer(address,address,uint256)"
+            ]
+          },
+          {
+            "name": "ynBTCk_op",
+            "network": "optimism",
+            "address": "0x68589adc7687A23Ff2B06fb032b997f09B44Ed5d",
+            "abi": "ERC4626",
+            "start_block": 130900000,
+            "events": [
+              "Deposit(address,address,uint256,uint256)",
+              "Withdraw(address,address,address,uint256,uint256)",
+              "Transfer(address,address,uint256)"
+            ]
+          }
         ]
       }
     }
