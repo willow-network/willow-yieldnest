@@ -4,19 +4,66 @@ import { runQuery, NoIndexingProgressError } from "./graphql";
 const POLL_MS = 3000;
 const RPC = (import.meta as any).env?.VITE_ETH_RPC ?? "/eth-rpc";
 
-async function latestIndexedBlock(subgrove: string): Promise<number> {
-  try {
-    const d = await runQuery<any>(
-      subgrove,
-      `{ deposits(first: 1, orderBy: blockNumber, orderDirection: desc) { blockNumber }
-         transfers(first: 1, orderBy: blockNumber, orderDirection: desc) { blockNumber } }`,
-    );
-    const arr = [...(d.deposits ?? []), ...(d.transfers ?? [])];
-    return arr.reduce((m, x) => Math.max(m, Number(x.blockNumber ?? 0)), 0);
-  } catch (e) {
-    if (e instanceof NoIndexingProgressError) return 0;
-    throw e;
+// Per-subgrove "what counts as a yn-event" query — picks the block-bearing
+// entities for each subgrove and asks for the single most-recent one. The
+// caller takes the max across all of them. Limited to ETH-mainnet subgroves
+// so the lag arithmetic (eth tip - indexed) lines up with the chain whose
+// tip we're showing; bnb / l2 subgroves index different chains and can't
+// be compared against an Ethereum block tip.
+const YN_LAG_QUERIES: ReadonlyArray<readonly [string, string]> = [
+  [
+    "yieldnest-vaults-eth",
+    `{ deposits(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber }
+       withdraws(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber }
+       transfers(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber } }`,
+  ],
+  [
+    "yieldnest-restaking-eth",
+    `{ totalETHStakedUpdateds(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber }
+       rewardsProcesseds(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber }
+       ethWithdrawns(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber } }`,
+  ],
+  [
+    "yieldnest-liquidity",
+    `{ swaps(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber }
+       mints(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber }
+       burns(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber } }`,
+  ],
+  [
+    "yieldnest-governance",
+    `{ transfers(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber }
+       delegateChangeds(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber }
+       delegateVotesChangeds(first:1, orderBy:blockNumber, orderDirection:desc) { blockNumber } }`,
+  ],
+];
+
+function maxBlockOf(d: any): number {
+  if (!d || typeof d !== "object") return 0;
+  let m = 0;
+  for (const v of Object.values(d)) {
+    if (Array.isArray(v)) {
+      for (const e of v) {
+        const b = Number((e as any)?.blockNumber ?? 0);
+        if (b > m) m = b;
+      }
+    }
   }
+  return m;
+}
+
+async function latestIndexedBlock(): Promise<number> {
+  const results = await Promise.all(
+    YN_LAG_QUERIES.map(async ([sg, q]) => {
+      try {
+        const d = await runQuery<any>(sg, q);
+        return maxBlockOf(d);
+      } catch (e) {
+        if (e instanceof NoIndexingProgressError) return 0;
+        return 0;
+      }
+    }),
+  );
+  return results.reduce((m, b) => Math.max(m, b), 0);
 }
 
 async function chainTip(): Promise<number> {
@@ -30,9 +77,10 @@ async function chainTip(): Promise<number> {
 }
 
 /** Two-part heartbeat: chain tip (Alchemy eth_blockNumber) always advances
- *  every ~12s. Local indexed tip (latest deposit/transfer) advances only
- *  when YieldNest contracts actually emit — which is bursty. */
-export function TipPulse({ subgrove = "yieldnest-vaults-eth" }: { subgrove?: string }) {
+ *  every ~12s. Local indexed tip (latest event across all ETH-mainnet YN
+ *  subgroves) advances only when YieldNest contracts actually emit — which
+ *  is bursty. */
+export function TipPulse() {
   const [tip, setTip] = useState<number | null>(null);
   const [indexed, setIndexed] = useState<number | null>(null);
   const [beatKey, setBeatKey] = useState(0);
@@ -43,7 +91,7 @@ export function TipPulse({ subgrove = "yieldnest-vaults-eth" }: { subgrove?: str
     let lastTip = 0;
     const tick = async () => {
       try {
-        const [t, i] = await Promise.all([chainTip(), latestIndexedBlock(subgrove)]);
+        const [t, i] = await Promise.all([chainTip(), latestIndexedBlock()]);
         if (!alive) return;
         if (t > lastTip) {
           lastTip = t;
@@ -58,7 +106,7 @@ export function TipPulse({ subgrove = "yieldnest-vaults-eth" }: { subgrove?: str
     const poll = setInterval(tick, POLL_MS);
     const ager = setInterval(() => setTipAge(a => a + 1), 1000);
     return () => { alive = false; clearInterval(poll); clearInterval(ager); };
-  }, [subgrove]);
+  }, []);
 
   const lag = tip !== null && indexed !== null ? tip - indexed : null;
   const fresh = tipAge < 6;

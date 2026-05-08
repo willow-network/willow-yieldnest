@@ -24,8 +24,15 @@ const SUBGROVE_QUERIES: Record<string, string> = {
   "yieldnest-governance": `{ transfers(first:1000){id} }`,
 };
 
+// "live" iff the indexer is making progress on the subgrove (event count
+// can be 0 — that just means no matching events have been seen yet, not
+// that the subgrove isn't running). "pending" is reserved for the case
+// where the indexer hasn't reported any progress, which the GraphQL layer
+// surfaces via `NoIndexingProgressError`.
+type SubgroveStatus = { count: number; indexing: boolean };
+
 function useCounts() {
-  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [counts, setCounts] = useState<Record<string, SubgroveStatus>>({});
   useEffect(() => {
     let alive = true;
     const tick = async () => {
@@ -35,10 +42,16 @@ function useCounts() {
           const d = await runQuery<any>(sg, query);
           const n = Object.values(d).reduce((sum: number, arr: any) =>
             sum + (Array.isArray(arr) ? arr.length : 0), 0);
-          return [sg, n] as const;
+          return [sg, { count: n, indexing: true }] as const;
         } catch (e) {
-          if (!(e instanceof NoIndexingProgressError)) console.warn(`counts(${sg})`, e);
-          return [sg, 0] as const;
+          if (e instanceof NoIndexingProgressError) {
+            return [sg, { count: 0, indexing: false }] as const;
+          }
+          console.warn(`counts(${sg})`, e);
+          // Transient indexer errors aren't a definitive "not indexing" —
+          // treat as still-indexing so the UI doesn't flap to "pending" on
+          // a flaky network blip.
+          return [sg, { count: 0, indexing: true }] as const;
         }
       }));
       if (!alive) return;
@@ -54,7 +67,9 @@ function useCounts() {
 export function Overview() {
   const s = useSubgroves();
   const counts = useCounts();
-  const slices = SUBGROVE_IDS.map(id => ({ name: id.replace("yieldnest-", ""), value: counts[id] ?? 0 })).filter(s => s.value > 0);
+  const slices = SUBGROVE_IDS
+    .map(id => ({ name: id.replace("yieldnest-", ""), value: counts[id]?.count ?? 0 }))
+    .filter(s => s.value > 0);
   const totalEntities = slices.reduce((n, x) => n + x.value, 0);
 
   return (
@@ -94,13 +109,21 @@ export function Overview() {
             <thead><tr><th>Subgrove</th><th>Entities</th><th>Status</th></tr></thead>
             <tbody>
               {SUBGROVE_IDS.map(id => {
-                const c = counts[id] ?? 0;
+                const st = counts[id];
+                const c = st?.count ?? 0;
+                // "pending" only when the indexer has NOT made any progress
+                // for this subgrove (NoIndexingProgressError). A subgrove
+                // that's actively indexing but hasn't matched any events
+                // yet (e.g. restaking-eth before its first RewardsProcessed)
+                // is still "live" — the count column conveys "0 so far".
+                const status = st === undefined ? "…" : st.indexing ? "live" : "pending";
+                const live = status === "live";
                 return (
                   <tr key={id}>
                     <td style={{ fontFamily: "monospace", fontSize: 12 }}>{id.replace("yieldnest-", "")}</td>
                     <td>{c.toLocaleString()}</td>
-                    <td style={{ color: c > 0 ? "var(--yn-success)" : "var(--yn-text-dim)" }}>
-                      {c > 0 ? "live" : "pending"}
+                    <td style={{ color: live ? "var(--yn-success)" : "var(--yn-text-dim)" }}>
+                      {status}
                     </td>
                   </tr>
                 );
