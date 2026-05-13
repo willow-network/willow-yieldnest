@@ -25,7 +25,9 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use willow_sdk::auth::{generate_did, DidInfo};
 use willow_sdk::consensus::ConsensusClient;
-use willow_sdk::subgrove_config::{IndexerConfigDef, SubgroveDefinition, WillowManifest};
+use willow_sdk::subgrove_config::{
+    DataSource, EvmDataSource, IndexerConfigDef, SubgroveDefinition, WillowManifest,
+};
 use willow_sdk::types::SignatureAlgorithm;
 
 #[derive(Parser, Debug)]
@@ -201,6 +203,21 @@ fn schema_file_for(subgrove_id: &str) -> &'static str {
     }
 }
 
+// `DataSource` is an enum (Evm | Solana) post the canonical-manifest
+// refactor in willow. Every YieldNest manifest is EVM today, so we
+// unwrap to the inner `EvmDataSource` for field access. Panics on any
+// non-EVM source — register-rs's regression test
+// (`tests/manifests.rs`) catches that drift before we hit deploy.
+fn evm(ds: &DataSource) -> &EvmDataSource {
+    match ds {
+        DataSource::Evm(d) => d,
+        other => panic!(
+            "register-rs expected EVM data source, got {:?} — add Solana support if needed",
+            other.network()
+        ),
+    }
+}
+
 fn build_template_config(
     cfg: &TemplateCfg,
     manifest: &WillowManifest,
@@ -212,7 +229,7 @@ fn build_template_config(
     let unique_events: BTreeSet<&str> = manifest
         .data_sources
         .iter()
-        .flat_map(|ds| ds.events.iter().map(|e| e.as_str()))
+        .flat_map(|ds| evm(ds).events.iter().map(|e| e.as_str()))
         .collect();
     let event_signatures: Vec<String> = unique_events
         .iter()
@@ -224,7 +241,7 @@ fn build_template_config(
     let contract_addresses: Vec<String> = manifest
         .data_sources
         .iter()
-        .map(|ds| ds.address.to_canonical_string())
+        .map(|ds| evm(ds).address.to_canonical_string())
         .collect();
     // SDK migrated `parameters` from `HashMap<String, Value>` to a
     // JSON-encoded `Vec<u8>` (#248 bincode wire format work). Encode
@@ -743,7 +760,7 @@ fn build_local_view(path: &Path, schemas_dir: &Path) -> Result<LocalManifestView
         .manifest
         .data_sources
         .iter()
-        .map(|ds| ds.start_block)
+        .map(|ds| evm(ds).start_block)
         .min()
         .unwrap_or(0);
     // The set of distinct networks the manifest targets. Multi-chain
@@ -752,7 +769,7 @@ fn build_local_view(path: &Path, schemas_dir: &Path) -> Result<LocalManifestView
         .manifest
         .data_sources
         .iter()
-        .map(|ds| ds.network.canonical_id().to_string())
+        .map(|ds| ds.network().canonical_id().to_string())
         .collect();
     let network = if networks.is_empty() {
         "(none)".to_string()
@@ -763,7 +780,7 @@ fn build_local_view(path: &Path, schemas_dir: &Path) -> Result<LocalManifestView
         .manifest
         .data_sources
         .iter()
-        .map(|ds| ds.address.to_canonical_string())
+        .map(|ds| evm(ds).address.to_canonical_string())
         .collect();
     Ok(LocalManifestView {
         subgrove_id: mf.subgrove_id,
