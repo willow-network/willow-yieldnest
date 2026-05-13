@@ -34,6 +34,12 @@ carries a GKR proof verified on-chain.
 | `yieldnest-restaking-eth`  | Ethereum       | StakingNodesManager, EL/CL receivers           |
 | `yieldnest-liquidity`      | Ethereum       | Curve/Uniswap pools *(awaiting WASM handler)*  |
 | `yieldnest-governance`     | Ethereum       | YND ERC-20 transfers, delegations              |
+| `uniswap-v3-eth-usdc` *    | Ethereum       | Generic example — V3 ETH/USDC pool, ETH price  |
+
+\* `uniswap-v3-eth-usdc` is **not** partner-specific. It lives here only
+because this directory is what `register-rs` auto-registers on devnet
+bringup; until Willow has its own generic-defaults registration pathway
+this is the simplest persistence path. Move out when that's built.
 
 Live state: vaults-eth + governance catching up to tip; restaking-eth at tip
 but low-traffic so rarely emits. BNB/L2 pipelines idle pending cross-chain
