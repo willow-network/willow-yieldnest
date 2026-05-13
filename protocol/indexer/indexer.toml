@@ -15,13 +15,12 @@ metrics_port = 9100
 historical_query_port = 3051
 grovedb_visualizer_port = 10310
 
-max_concurrent_indexing = 6
+max_concurrent_indexing = 8
 storage_limit_gb = 100
 
-# Whitelist: keep this indexer focused on the six yieldnest subgroves so
-# the marketplace doesn't pull in unrelated subgroves (e.g. test
-# subgroves on the same chain) and squeeze one of them out at the
-# `max_concurrent_indexing = 6` cap.
+# Whitelist: keep this indexer focused on a known set so the marketplace
+# doesn't pull in unrelated subgroves (e.g. test subgroves on the same
+# chain) and squeeze one of them out at the `max_concurrent_indexing` cap.
 subgrove_filter = [
     "yieldnest-vaults-eth",
     "yieldnest-vaults-bnb",
@@ -29,6 +28,7 @@ subgrove_filter = [
     "yieldnest-restaking-eth",
     "yieldnest-liquidity",
     "yieldnest-governance",
+    "uniswap-v3-eth-usdc",
 ]
 
 # Ethereum mainnet RPCs for YieldNest contracts. Public endpoints — rate-limited
