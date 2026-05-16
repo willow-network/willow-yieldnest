@@ -27,7 +27,7 @@
         "template_id": "balance-aggregator-v2",
         "template_version": 1,
         "variant_id": "balance-aggregator-v2-fixed64",
-        "chain": "ethereum",
+        "chain": "mainnet",
         "parameters": {
           "token_contract": "0x7159cc276D7d17Ab4b3bEb19959E1F39368a45Ba",
           "tracked_addresses": [
