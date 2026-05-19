@@ -3,7 +3,6 @@ import { SampleProofBadge } from "../yieldnest/SampleProofBadge";
 import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
-import { PageSizeSelector, DEFAULT_PAGE_SIZE, type PageSize } from "../yieldnest/PageSize";
 import {
   ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip,
 } from "recharts";
@@ -18,7 +17,9 @@ type State =
   | { status: "ok"; data: Data }
   | { status: "error"; message: string };
 
-function useRestakingData(pageSize: PageSize): State {
+const PAGE_SIZE = 1000;
+
+function useRestakingData(): State {
   const [s, setS] = useState<State>({ status: "loading" });
   useEffect(() => {
     let alive = true;
@@ -38,14 +39,14 @@ function useRestakingData(pageSize: PageSize): State {
         const [vaults, restaking] = await Promise.all([
           runQuery<{ transfers: Transfer[] }>(
             "yieldnest-vaults-eth",
-            `{ transfers(first: ${pageSize}) { id from to value blockNumber } }`,
+            `{ transfers(first: ${PAGE_SIZE}) { id from to value blockNumber } }`,
           ).catch(e => {
             if (e instanceof NoIndexingProgressError) return { transfers: [] };
             throw e;
           }),
           runQuery<{ totalETHStakedUpdateds: StakedUpdate[] }>(
             "yieldnest-restaking-eth",
-            `{ totalETHStakedUpdateds(first: ${pageSize}) { id totalETHStaked blockNumber } }`,
+            `{ totalETHStakedUpdateds(first: ${PAGE_SIZE}) { id totalETHStaked blockNumber } }`,
           ).catch(e => {
             if (e instanceof NoIndexingProgressError) return { totalETHStakedUpdateds: [] };
             throw e;
@@ -67,7 +68,7 @@ function useRestakingData(pageSize: PageSize): State {
     tick();
     const id = setInterval(tick, 6000);
     return () => { alive = false; clearInterval(id); };
-  }, [pageSize]);
+  }, []);
   return s;
 }
 
@@ -76,8 +77,7 @@ function weiToEth(s: string): number {
 }
 
 export function Restaking() {
-  const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
-  const s = useRestakingData(pageSize);
+  const s = useRestakingData();
   const xfers = s.status === "ok" ? s.data.transfers : [];
   const staked = s.status === "ok" ? s.data.staked : [];
 
@@ -116,14 +116,9 @@ export function Restaking() {
 
   return (
     <section>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-        <h1 style={{ marginTop: 0 }}>Restaking</h1>
-        <PageSizeSelector value={pageSize} onChange={setPageSize} />
-      </div>
-      <p>
-        <SubgroveStatus id="yieldnest-restaking-eth" />{" "}
-        <SubgroveStatus id="yieldnest-vaults-eth" />
-      </p>
+      <h1 style={{ marginTop: 0 }}>Restaking</h1>
+      <p><SubgroveStatus id="yieldnest-restaking-eth" /></p>
+      <p><SubgroveStatus id="yieldnest-vaults-eth" /></p>
       <p className="yn-placeholder">
         Native ETH staked across YieldNest's StakingNodesManager (authoritative
         snapshot) plus restaking-share movements on vault tokens (ynETH, ynLSDe,
