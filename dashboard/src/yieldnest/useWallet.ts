@@ -19,7 +19,7 @@ export function useWallet() {
 
   useEffect(() => {
     if (!available) return;
-    if (sessionStorage.getItem(DISCONNECTED_KEY)) return;
+    if (localStorage.getItem(DISCONNECTED_KEY)) return;
     window.ethereum!
       .request({ method: "eth_accounts" })
       .then((accs: string[]) => {
@@ -28,7 +28,7 @@ export function useWallet() {
       .catch(() => { /* ignore */ });
 
     const onChange = (accs: string[]) => {
-      if (sessionStorage.getItem(DISCONNECTED_KEY)) return;
+      if (localStorage.getItem(DISCONNECTED_KEY)) return;
       setAddr(accs?.[0] ?? null);
     };
     window.ethereum?.on?.("accountsChanged", onChange);
@@ -38,7 +38,7 @@ export function useWallet() {
   const connect = useCallback(async () => {
     if (!window.ethereum) { setError("No EVM wallet detected"); return; }
     try {
-      sessionStorage.removeItem(DISCONNECTED_KEY);
+      localStorage.removeItem(DISCONNECTED_KEY);
       const accs: string[] = await window.ethereum.request({ method: "eth_requestAccounts" });
       if (accs?.[0]) { setAddr(accs[0]); setError(null); }
     } catch (e: any) {
@@ -46,9 +46,18 @@ export function useWallet() {
     }
   }, []);
 
-  const disconnect = useCallback(() => {
-    sessionStorage.setItem(DISCONNECTED_KEY, "1");
+  const disconnect = useCallback(async () => {
+    localStorage.setItem(DISCONNECTED_KEY, "1");
     setAddr(null);
+    // EIP-2255: ask the wallet to actually forget the grant so reconnect
+    // requires fresh user approval. Silently ignore wallets that don't
+    // implement it (older MetaMask, non-MM injected providers).
+    try {
+      await window.ethereum?.request({
+        method: "wallet_revokePermissions",
+        params: [{ eth_accounts: {} }],
+      });
+    } catch { /* unsupported — flag-based disconnect still applies */ }
   }, []);
 
   return { available, addr, error, connect, disconnect };
