@@ -1,11 +1,14 @@
 {
   "subgrove_id": "yieldnest-vaults-eth",
-  "description": "YieldNest vault events on Ethereum — ynETH, ynLSDe, ynETHx, ynUSDx, ynRWAx",
+  "description": "YieldNest vault events on Ethereum \u2014 ynETH, ynLSDe, ynETHx, ynUSDx, ynRWAx",
   "mode": {
     "BlockchainIndexing": {
       "execution_mode": "IndexerExecution",
       "retention_window": "Indefinite",
-      "indexer_config": { "min_indexers": 3, "reward_rate_per_block": "100000000000000000" },
+      "indexer_config": {
+        "min_indexers": 3,
+        "reward_rate_per_block": "100000000000000000"
+      },
       "manifest": {
         "spec_version": "1.0.0",
         "data_sources": [
@@ -16,9 +19,9 @@
             "abi": "ERC4626",
             "start_block": 19800000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           },
           {
@@ -28,9 +31,9 @@
             "abi": "ERC4626",
             "start_block": 19800000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           },
           {
@@ -40,9 +43,9 @@
             "abi": "ERC4626",
             "start_block": 19800000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           },
           {
@@ -52,9 +55,9 @@
             "abi": "ERC4626",
             "start_block": 19800000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           },
           {
@@ -64,9 +67,9 @@
             "abi": "ERC4626",
             "start_block": 19800000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           }
         ]

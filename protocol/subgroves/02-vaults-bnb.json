@@ -1,11 +1,16 @@
 {
   "subgrove_id": "yieldnest-vaults-bnb",
-  "description": "YieldNest vault events on BNB Chain — ynBNB, ynBNBx, ynBTCk",
+  "description": "YieldNest vault events on BNB Chain \u2014 ynBNB, ynBNBx, ynBTCk",
   "mode": {
     "BlockchainIndexing": {
       "execution_mode": "IndexerExecution",
-      "retention_window": { "Blocks": 432000 },
-      "indexer_config": { "min_indexers": 3, "reward_rate_per_block": "100000000000000000" },
+      "retention_window": {
+        "Blocks": 432000
+      },
+      "indexer_config": {
+        "min_indexers": 3,
+        "reward_rate_per_block": "100000000000000000"
+      },
       "manifest": {
         "spec_version": "1.0.0",
         "data_sources": [
@@ -16,9 +21,9 @@
             "abi": "ERC4626",
             "start_block": 92000000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           },
           {
@@ -28,9 +33,9 @@
             "abi": "ERC4626",
             "start_block": 92000000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           },
           {
@@ -40,9 +45,9 @@
             "abi": "ERC4626",
             "start_block": 92000000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           }
         ]

@@ -5,7 +5,10 @@
     "BlockchainIndexing": {
       "execution_mode": "IndexerExecution",
       "retention_window": "Indefinite",
-      "indexer_config": { "min_indexers": 3, "reward_rate_per_block": "150000000000000000" },
+      "indexer_config": {
+        "min_indexers": 3,
+        "reward_rate_per_block": "150000000000000000"
+      },
       "manifest": {
         "spec_version": "1.0.0",
         "data_sources": [
@@ -18,7 +21,7 @@
             "events": [
               "TotalETHStakedUpdated(uint256)",
               "RewardsProcessed(uint256,uint256,uint256,uint256,uint256)",
-              "EthWithdrawn(address,uint256)"
+              "EthWithdrawn(address indexed,uint256)"
             ]
           },
           {
@@ -30,7 +33,7 @@
             "events": [
               "TotalETHStakedUpdated(uint256)",
               "RewardsProcessed(uint256,uint256,uint256,uint256,uint256)",
-              "EthWithdrawn(address,uint256)"
+              "EthWithdrawn(address indexed,uint256)"
             ]
           },
           {
@@ -42,7 +45,7 @@
             "events": [
               "TotalETHStakedUpdated(uint256)",
               "RewardsProcessed(uint256,uint256,uint256,uint256,uint256)",
-              "EthWithdrawn(address,uint256)"
+              "EthWithdrawn(address indexed,uint256)"
             ]
           },
           {
@@ -54,7 +57,7 @@
             "events": [
               "TotalETHStakedUpdated(uint256)",
               "RewardsProcessed(uint256,uint256,uint256,uint256,uint256)",
-              "EthWithdrawn(address,uint256)"
+              "EthWithdrawn(address indexed,uint256)"
             ]
           }
         ]

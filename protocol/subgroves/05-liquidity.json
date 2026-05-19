@@ -1,11 +1,14 @@
 {
   "subgrove_id": "yieldnest-liquidity",
-  "description": "Ethereum DEX liquidity baseline (Uniswap V2 USDC/WETH) — live market activity alongside YieldNest vaults",
+  "description": "Ethereum DEX liquidity baseline (Uniswap V2 USDC/WETH) \u2014 live market activity alongside YieldNest vaults",
   "mode": {
     "BlockchainIndexing": {
       "execution_mode": "IndexerExecution",
       "retention_window": "Indefinite",
-      "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "75000000000000000" },
+      "indexer_config": {
+        "min_indexers": 2,
+        "reward_rate_per_block": "75000000000000000"
+      },
       "manifest": {
         "spec_version": "1.0.0",
         "data_sources": [
@@ -16,9 +19,9 @@
             "abi": "UniswapV2Pair",
             "start_block": 19800000,
             "events": [
-              "Swap(address,uint256,uint256,uint256,uint256,address)",
-              "Mint(address,uint256,uint256)",
-              "Burn(address,uint256,uint256,address)"
+              "Swap(address indexed,uint256,uint256,uint256,uint256,address indexed)",
+              "Mint(address indexed,uint256,uint256)",
+              "Burn(address indexed,uint256,uint256,address indexed)"
             ]
           }
         ]
