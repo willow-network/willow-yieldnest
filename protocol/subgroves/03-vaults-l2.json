@@ -1,11 +1,16 @@
 {
   "subgrove_id": "yieldnest-vaults-l2",
-  "description": "YieldNest MAX vault mirrors — ynETHx on L2s (per-chain start_block TBD, using optimism deployment as anchor)",
+  "description": "YieldNest MAX vault mirrors \u2014 ynETHx on L2s (per-chain start_block TBD, using optimism deployment as anchor)",
   "mode": {
     "BlockchainIndexing": {
       "execution_mode": "IndexerExecution",
-      "retention_window": { "Blocks": 864000 },
-      "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "50000000000000000" },
+      "retention_window": {
+        "Blocks": 864000
+      },
+      "indexer_config": {
+        "min_indexers": 2,
+        "reward_rate_per_block": "50000000000000000"
+      },
       "manifest": {
         "spec_version": "1.0.0",
         "data_sources": [
@@ -16,9 +21,9 @@
             "abi": "ERC4626",
             "start_block": 130900000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           },
           {
@@ -28,9 +33,9 @@
             "abi": "ERC4626",
             "start_block": 130900000,
             "events": [
-              "Deposit(address,address,uint256,uint256)",
-              "Withdraw(address,address,address,uint256,uint256)",
-              "Transfer(address,address,uint256)"
+              "Deposit(address indexed,address indexed,uint256,uint256)",
+              "Withdraw(address indexed,address indexed,address indexed,uint256,uint256)",
+              "Transfer(address indexed,address indexed,uint256)"
             ]
           }
         ]

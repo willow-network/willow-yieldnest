@@ -1,11 +1,14 @@
 {
   "subgrove_id": "uniswap-v3-eth-usdc",
-  "description": "Uniswap V3 ETH/USDC 0.05% pool — Swap events with sqrtPriceX96 for live ETH price (generic Willow example, not partner-specific)",
+  "description": "Uniswap V3 ETH/USDC 0.05% pool \u2014 Swap events with sqrtPriceX96 for live ETH price (generic Willow example, not partner-specific)",
   "mode": {
     "BlockchainIndexing": {
       "execution_mode": "IndexerExecution",
       "retention_window": "Indefinite",
-      "indexer_config": { "min_indexers": 2, "reward_rate_per_block": "75000000000000000" },
+      "indexer_config": {
+        "min_indexers": 2,
+        "reward_rate_per_block": "75000000000000000"
+      },
       "manifest": {
         "spec_version": "1.0.0",
         "data_sources": [
@@ -16,7 +19,7 @@
             "abi": "UniswapV3Pool",
             "start_block": 24800000,
             "events": [
-              "Swap(address,address,int256,int256,uint160,uint128,int24)"
+              "Swap(address indexed,address indexed,int256,int256,uint160,uint128,int24)"
             ]
           }
         ]
