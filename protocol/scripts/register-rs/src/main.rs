@@ -39,8 +39,7 @@ struct Args {
     /// Willow REST API endpoint used for nonce lookups and queries.
     #[arg(long, global = true, default_value = "http://localhost:3031")]
     api: String,
-    /// Path to a JSON file storing the owner DID + ed25519 key. Created on
-    /// first run unless --owner-did / --key-hex are passed.
+    /// Path to a JSON file storing the owner DID + ed25519 key. Created on first run unless --owner-did + (--key-file or --key-hex) are passed.
     #[arg(
         long,
         global = true,
@@ -50,9 +49,12 @@ struct Args {
     /// Owner DID (takes precedence over --did-file).
     #[arg(long, global = true)]
     owner_did: Option<String>,
-    /// Hex-encoded 32-byte ed25519 private key paired with --owner-did.
-    #[arg(long, global = true)]
+    /// Hex-encoded 32-byte ed25519 private key paired with --owner-did. Prefer --key-file.
+    #[arg(long, global = true, conflicts_with = "key_file")]
     key_hex: Option<String>,
+    /// Path to a file containing a hex-encoded 32-byte ed25519 private key.
+    #[arg(long, global = true)]
+    key_file: Option<String>,
     /// Skip the upfront DID registration step (handy for repeat runs).
     #[arg(long, global = true)]
     skip_did: bool,
@@ -414,8 +416,19 @@ struct IdentityContext {
 }
 
 fn load_identity(args: &Args) -> Result<IdentityContext> {
-    if let (Some(did), Some(kh)) = (args.owner_did.as_ref(), args.key_hex.as_ref()) {
-        let sk = load_signing_key(kh)?;
+    let inline_key = match (args.key_hex.as_ref(), args.key_file.as_ref()) {
+        (Some(kh), _) => Some(kh.clone()),
+        (None, Some(path)) => {
+            let p = expand(path);
+            Some(
+                std::fs::read_to_string(&p)
+                    .with_context(|| format!("read --key-file {}", p.display()))?,
+            )
+        }
+        (None, None) => None,
+    };
+    if let (Some(did), Some(kh)) = (args.owner_did.as_ref(), inline_key) {
+        let sk = load_signing_key(&kh)?;
         let kid = format!("{}#key-1", did);
         Ok(IdentityContext {
             owner_did: did.clone(),
