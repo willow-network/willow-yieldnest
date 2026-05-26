@@ -13,7 +13,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@willow/sdk": "file:../../willow/sdk/willow-typescript",
+    "@willow/sdk": "file:./vendor/willow-sdk",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.0",
