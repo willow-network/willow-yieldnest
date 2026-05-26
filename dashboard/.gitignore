@@ -1,5 +1,5 @@
 node_modules
-dist
+/dist
 tsconfig.tsbuildinfo
 
 # Env files — keep .env.example tracked, real secrets in .env.local
