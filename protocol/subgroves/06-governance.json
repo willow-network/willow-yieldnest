@@ -3,7 +3,7 @@
   "description": "YND governance token \u2014 Ethereum mainnet anchor (multi-chain expansion via future WASM handler)",
   "mode": {
     "BlockchainIndexing": {
-      "execution_mode": "GkrExecution",
+      "execution_mode": "ConsensusExecution",
       "retention_window": "Indefinite",
       "indexer_config": {
         "min_indexers": 2,
