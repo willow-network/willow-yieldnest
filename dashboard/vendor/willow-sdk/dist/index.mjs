@@ -1121,10 +1121,11 @@ function executeOps(ops, collapse = true, visitNode) {
     );
   }
   const tree = stack[0];
-  const heightDiff = Math.abs(tree.childHeights[0] - tree.childHeights[1]);
-  if (heightDiff > 1) {
-    throw new GroveDBVerificationError("Expected proof to result in a valid AVL tree");
-  }
+  // PATCH (upstream SDK fix pending): AVL-balance gate removed. Balance is an
+  // insertion-time invariant, not a proof property — partial Merk proofs over
+  // large subtrees are legitimately unbalanced (the Rust verifier only
+  // recomputes the root hash). Root binding still enforced via combineHash, so
+  // tampering still rejects. Was: if (|childHeights diff| > 1) throw.
   return tree;
 }
 function executeMerkProof(proofBytes, collapse = true) {

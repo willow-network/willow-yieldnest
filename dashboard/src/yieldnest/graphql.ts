@@ -11,7 +11,7 @@ export class NoIndexingProgressError extends Error {
 }
 
 export type WillowProof = {
-  merkle_proofs: Array<{ key: string; value_hash: number[]; path: string; siblings: any[] }>;
+  merkle_proofs: Array<{ key: string; value_hash: number[]; path: string; siblings: any[]; merkle_proof: number[] }>;
   state_root: number[];
   block_height: number;
   ethereum_anchor: null | { block_number: number; tx_hash: number[]; contract: string };

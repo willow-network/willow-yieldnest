@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -11,6 +12,14 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    resolve: {
+      alias: {
+        // The vendored @willow/sdk imports node's `crypto` (createHash) for
+        // server-side consensus anchoring; the browser proof verifier doesn't
+        // use it. Point it at a shim so the bundle resolves.
+        crypto: fileURLToPath(new URL('./src/lib/crypto-shim.ts', import.meta.url)),
+      },
+    },
     server: {
       port: 5273,
       strictPort: true,
