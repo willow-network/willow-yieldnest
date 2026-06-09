@@ -92,8 +92,8 @@ export function Overview() {
         </div>
         <div className="yn-card">
           <h3>Indexing window</h3>
-          <div className="big">~100k blocks</div>
-          <div className="sub">from block 24,790,000 to chain tip</div>
+          <div className="big">~5.5M blocks</div>
+          <div className="sub">from block 19,800,000 to chain tip</div>
         </div>
       </div>
 

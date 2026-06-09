@@ -29,7 +29,7 @@ type DepositsOpts = {
 /** Fetch deposits for a subgrove. Defaults to the full set (charts) on a slow
  *  poll; pass `{ first, orderDesc }` for a light latest-N feed. */
 export function useDeposits(subgrove: string, opts?: DepositsOpts): State {
-  const first = opts?.first ?? 2000;
+  const first = opts?.first ?? 800;
   const pollMs = opts?.pollMs ?? 20000;
   const order = opts?.orderDesc ? ", orderBy: blockNumber, orderDirection: desc" : "";
   const [s, setS] = useState<State>({ status: "loading" });
