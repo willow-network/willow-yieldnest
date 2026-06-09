@@ -17,7 +17,7 @@ type State =
   | { status: "ok"; data: Data }
   | { status: "error"; message: string };
 
-const PAGE_SIZE = 1000;
+const PAGE_SIZE = 300;
 
 function useRestakingData(): State {
   const [s, setS] = useState<State>({ status: "loading" });

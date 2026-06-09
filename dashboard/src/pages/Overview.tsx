@@ -14,10 +14,10 @@ const SUBGROVE_IDS = [
 ];
 
 const SUBGROVE_QUERIES: Record<string, string> = {
-  "yieldnest-vaults-eth": `{ deposits(first:300){id} transfers(first:300){id} }`,
-  "yieldnest-restaking-eth": `{ totalETHStakedUpdateds(first:300){id} rewardsProcesseds(first:300){id} ethWithdrawns(first:300){id} }`,
-  "yieldnest-liquidity": `{ swaps(first:300){id} mints(first:300){id} burns(first:300){id} }`,
-  "yieldnest-governance": `{ transfers(first:300){id} }`,
+  "yieldnest-vaults-eth": `{ deposits(first:150){id} transfers(first:150){id} }`,
+  "yieldnest-restaking-eth": `{ totalETHStakedUpdateds(first:150){id} rewardsProcesseds(first:150){id} ethWithdrawns(first:150){id} }`,
+  "yieldnest-liquidity": `{ swaps(first:150){id} mints(first:150){id} burns(first:150){id} }`,
+  "yieldnest-governance": `{ transfers(first:150){id} }`,
 };
 
 // "live" iff the indexer is making progress on the subgrove (event count
@@ -34,7 +34,7 @@ function useCounts() {
     const tick = async () => {
       const entries = await Promise.all(SUBGROVE_IDS.map(async sg => {
         try {
-          const query = SUBGROVE_QUERIES[sg] ?? `{ deposits(first:300){id} transfers(first:300){id} }`;
+          const query = SUBGROVE_QUERIES[sg] ?? `{ deposits(first:150){id} transfers(first:150){id} }`;
           const d = await runQuery<any>(sg, query);
           const n = Object.values(d).reduce((sum: number, arr: any) =>
             sum + (Array.isArray(arr) ? arr.length : 0), 0);

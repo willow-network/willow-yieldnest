@@ -23,7 +23,7 @@ function useRestakingActivity(): number {
       try {
         const d = await runQuery<{ totalETHStakedUpdateds: { id: string }[] }>(
           "yieldnest-restaking-eth",
-          `{ totalETHStakedUpdateds(first: 5000) { id } }`,
+          `{ totalETHStakedUpdateds(first: 300) { id } }`,
         );
         if (!alive) return;
         setN(d.totalETHStakedUpdateds?.length ?? 0);

@@ -35,7 +35,7 @@ function useGovernanceTransfers(): State {
       try {
         const d = await runQuery<{ transfers: Transfer[] }>(
           "yieldnest-governance",
-          `{ transfers(first: 500, orderBy: blockNumber, orderDirection: desc) { id from to value blockNumber } }`,
+          `{ transfers(first: 300, orderBy: blockNumber, orderDirection: desc) { id from to value blockNumber } }`,
         );
         if (!alive) return;
         setS({ status: "ok", transfers: d.transfers ?? [] });
