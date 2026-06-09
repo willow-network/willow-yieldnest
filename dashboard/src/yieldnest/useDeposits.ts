@@ -16,8 +16,22 @@ type State =
   | { status: "ok"; deposits: Deposit[] }
   | { status: "error"; message: string };
 
-/** Fetch all (up to 5000) deposits for a subgrove, refreshing every 5s. */
-export function useDeposits(subgrove: string): State {
+type DepositsOpts = {
+  /** Max rows to fetch. Each returned row enlarges the attached Merkle proof,
+   *  so callers that only render a handful (e.g. a live feed) should cap this. */
+  first?: number;
+  /** Fetch newest-first — pair with a small `first` for "latest N" feeds. */
+  orderDesc?: boolean;
+  /** Poll interval (ms). yn events are bursty/quiet, so default is slow. */
+  pollMs?: number;
+};
+
+/** Fetch deposits for a subgrove. Defaults to the full set (charts) on a slow
+ *  poll; pass `{ first, orderDesc }` for a light latest-N feed. */
+export function useDeposits(subgrove: string, opts?: DepositsOpts): State {
+  const first = opts?.first ?? 5000;
+  const pollMs = opts?.pollMs ?? 20000;
+  const order = opts?.orderDesc ? ", orderBy: blockNumber, orderDirection: desc" : "";
   const [s, setS] = useState<State>({ status: "loading" });
   useEffect(() => {
     let alive = true;
@@ -25,7 +39,7 @@ export function useDeposits(subgrove: string): State {
       try {
         const d = await runQuery<{ deposits: Deposit[] }>(
           subgrove,
-          `{ deposits(first: 5000) {
+          `{ deposits(first: ${first}${order}) {
               id caller owner assets shares blockNumber timestamp
             } }`,
         );
@@ -41,9 +55,9 @@ export function useDeposits(subgrove: string): State {
       }
     };
     tick();
-    const id = setInterval(tick, 5000);
+    const id = setInterval(tick, pollMs);
     return () => { alive = false; clearInterval(id); };
-  }, [subgrove]);
+  }, [subgrove, first, order, pollMs]);
   return s;
 }
 

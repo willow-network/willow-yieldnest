@@ -33,7 +33,7 @@ function useRestakingActivity(): number {
       }
     };
     tick();
-    const id = setInterval(tick, 5000);
+    const id = setInterval(tick, 20000);
     return () => { alive = false; clearInterval(id); };
   }, []);
   return n;

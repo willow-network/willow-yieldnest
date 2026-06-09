@@ -66,7 +66,7 @@ function useRestakingData(): State {
       }
     };
     tick();
-    const id = setInterval(tick, 6000);
+    const id = setInterval(tick, 20000);
     return () => { alive = false; clearInterval(id); };
   }, []);
   return s;
@@ -81,7 +81,6 @@ export function Restaking() {
   const xfers = s.status === "ok" ? s.data.transfers : [];
   const staked = s.status === "ok" ? s.data.staked : [];
 
-  const totalVolume = xfers.reduce((n, t) => n + weiToEth(t.value), 0);
   const uniqueAddrs = new Set<string>();
   for (const t of xfers) { uniqueAddrs.add(t.from); uniqueAddrs.add(t.to); }
 
@@ -134,11 +133,6 @@ export function Restaking() {
           <h3>Share transfers</h3>
           <div className="big">{s.status === "ok" ? xfers.length.toLocaleString() : "—"}</div>
           <div className="sub">on yn* vault tokens</div>
-        </div>
-        <div className="yn-card">
-          <h3>Total volume moved</h3>
-          <div className="big">{totalVolume.toFixed(2)}</div>
-          <div className="sub">aggregate share units (18-decimal)</div>
         </div>
         <div className="yn-card">
           <h3>Unique addresses</h3>

@@ -3,7 +3,9 @@ import { ProofBadge } from "./ProofBadge";
 import { CopyAddress } from "./CopyAddress";
 
 export function LiveFeed({ subgrove }: { subgrove: string }) {
-  const s = useDeposits(subgrove);
+  // Only the latest 12 are shown — fetch just those (newest-first) instead of
+  // the full set, which keeps the attached proof small on the landing page.
+  const s = useDeposits(subgrove, { first: 12, orderDesc: true });
   const latest: Deposit[] =
     s.status === "ok"
       ? [...s.deposits].sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber)).slice(0, 12)

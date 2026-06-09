@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "./graphql";
 
-const POLL_MS = 3000;
+const POLL_MS = 10000;
 const RPC = (import.meta as any).env?.VITE_ETH_RPC ?? "/eth-rpc";
 
 // Per-subgrove "what counts as a yn-event" query — picks the block-bearing
@@ -137,7 +137,7 @@ export function TipPulse() {
         ) : (
           <>
             <span style={{ color: "var(--yn-text)", fontFamily: "monospace" }}>
-              tip {tip.toLocaleString()}
+              eth tip {tip.toLocaleString()}
             </span>
             {indexed !== null && indexed > 0 && (
               <>

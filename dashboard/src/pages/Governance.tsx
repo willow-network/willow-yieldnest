@@ -48,7 +48,7 @@ function useGovernanceTransfers(): State {
       }
     };
     tick();
-    const id = setInterval(tick, 6000);
+    const id = setInterval(tick, 20000);
     return () => { alive = false; clearInterval(id); };
   }, []);
   return s;
