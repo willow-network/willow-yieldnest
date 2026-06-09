@@ -209,3 +209,18 @@ body {
   /* iOS Safari auto-zooms on focus when input font-size < 16px. */
   input, select, textarea { font-size: 16px !important; }
 }
+
+/* Verifiable-data loading state (see ProofLoader) */
+.yn-proof-loader {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 0; color: var(--yn-text-dim); font-size: 13px;
+}
+.yn-proof-count { font-family: monospace; color: var(--yn-accent); }
+.yn-proof-spinner {
+  width: 14px; height: 14px; flex: none;
+  border: 2px solid var(--yn-border);
+  border-top-color: var(--yn-accent);
+  border-radius: 50%;
+  animation: yn-spin 0.7s linear infinite;
+}
+@keyframes yn-spin { to { transform: rotate(360deg); } }

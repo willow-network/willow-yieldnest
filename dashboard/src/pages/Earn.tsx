@@ -3,6 +3,7 @@ import { useSubgroves } from "../yieldnest/useSubgroves";
 import { useDeposits, assetsNumberHeuristic } from "../yieldnest/useDeposits";
 import { CumulativeTvlChart, DepositVolumeChart, TopDepositorsChart } from "../yieldnest/charts";
 import { SampleProofBadge } from "../yieldnest/SampleProofBadge";
+import { ProofLoader } from "../yieldnest/ProofLoader";
 import { useVaultTvl, fmtUsd } from "../yieldnest/useVaultTvl";
 
 export function Earn() {
@@ -60,19 +61,19 @@ export function Earn() {
         <div className="yn-card">
           <h3>Cumulative deposits over time</h3>
           <div className="sub" style={{ marginBottom: 12 }}>sum of assets deposited, by block</div>
-          {eth.status === "ok" ? <CumulativeTvlChart deposits={eth.deposits} /> : <p className="yn-placeholder">loading…</p>}
+          {eth.status === "ok" ? <CumulativeTvlChart deposits={eth.deposits} /> : <ProofLoader />}
           <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
         </div>
         <div className="yn-card">
           <h3>Deposit volume (200-block buckets)</h3>
           <div className="sub" style={{ marginBottom: 12 }}>inflow per ~40-minute window</div>
-          {eth.status === "ok" ? <DepositVolumeChart deposits={eth.deposits} /> : <p className="yn-placeholder">loading…</p>}
+          {eth.status === "ok" ? <DepositVolumeChart deposits={eth.deposits} /> : <ProofLoader />}
           <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
         </div>
         <div className="yn-card" style={{ gridColumn: "span 2" }}>
           <h3>Top depositors</h3>
           <div className="sub" style={{ marginBottom: 12 }}>summed asset value per owner address</div>
-          {eth.status === "ok" ? <TopDepositorsChart deposits={eth.deposits} /> : <p className="yn-placeholder">loading…</p>}
+          {eth.status === "ok" ? <TopDepositorsChart deposits={eth.deposits} /> : <ProofLoader />}
           <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
         </div>
       </div>

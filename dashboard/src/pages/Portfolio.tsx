@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
+import { ProofLoader } from "../yieldnest/ProofLoader";
 import { ProofBadge } from "../yieldnest/ProofBadge";
 import { useAddressActivity } from "../yieldnest/useAddressActivity";
 import { assetsNumberHeuristic } from "../yieldnest/useDeposits";
@@ -99,7 +100,7 @@ export function Portfolio() {
         </p>
       )}
 
-      {activity.status === "loading" && <p className="yn-placeholder">loading…</p>}
+      {activity.status === "loading" && <ProofLoader />}
       {activity.status === "error" && <p className="yn-placeholder">error: {activity.message}</p>}
 
       {activity.status === "ok" && summary && (

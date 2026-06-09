@@ -1,5 +1,6 @@
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
 import { SampleProofBadge } from "../yieldnest/SampleProofBadge";
+import { ProofLoader } from "../yieldnest/ProofLoader";
 import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
@@ -160,7 +161,7 @@ export function Restaking() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <p className="yn-placeholder">no staking-update events yet</p>
+            s.status === "loading" ? <ProofLoader /> : <p className="yn-placeholder">no staking-update events yet</p>
           )}
           <div style={{ marginTop: 10 }}>
             <SampleProofBadge subgrove="yieldnest-restaking-eth" entityTypes={["totalETHStakedUpdated"]} />
@@ -185,7 +186,7 @@ export function Restaking() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <p className="yn-placeholder">no transfer events yet</p>
+            s.status === "loading" ? <ProofLoader /> : <p className="yn-placeholder">no transfer events yet</p>
           )}
           <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
         </div>
@@ -195,7 +196,7 @@ export function Restaking() {
         <h3>Largest senders</h3>
         <div className="sub" style={{ marginBottom: 12 }}>top 5 addresses by share-token outflow</div>
         {topSenders.length === 0 ? (
-          <p className="yn-placeholder">no data yet</p>
+          s.status === "loading" ? <ProofLoader /> : <p className="yn-placeholder">no data yet</p>
         ) : (
           <table className="yn-table">
             <thead><tr><th>Address</th><th>Volume</th><th>Proof</th></tr></thead>

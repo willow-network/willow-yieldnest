@@ -1,4 +1,5 @@
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
+import { ProofLoader } from "../yieldnest/ProofLoader";
 import { ProofBadge } from "../yieldnest/ProofBadge";
 import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
@@ -136,7 +137,7 @@ export function Governance() {
           <h3>Cumulative transfer volume</h3>
           <div className="sub" style={{ marginBottom: 12 }}>summed YND value transferred, by block</div>
           {cumData.length === 0 ? (
-            <p className="yn-placeholder">no transfers indexed yet</p>
+            s.status === "loading" ? <ProofLoader /> : <p className="yn-placeholder">no transfers indexed yet</p>
           ) : (
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
@@ -157,7 +158,7 @@ export function Governance() {
           <h3>Top YND holders</h3>
           <div className="sub" style={{ marginBottom: 12 }}>net inflow (received − sent) across indexed blocks</div>
           {topHolders.length === 0 ? (
-            <p className="yn-placeholder">no holder data yet</p>
+            s.status === "loading" ? <ProofLoader /> : <p className="yn-placeholder">no holder data yet</p>
           ) : (
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={topHolders} layout="vertical"

@@ -5,6 +5,7 @@ import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
 import { SubgroveShareChart } from "../yieldnest/charts";
 import { LiveFeed } from "../yieldnest/LiveFeed";
 import { TipPulse } from "../yieldnest/TipPulse";
+import { ProofLoader } from "../yieldnest/ProofLoader";
 
 const SUBGROVE_IDS = [
   "yieldnest-vaults-eth",
@@ -130,7 +131,7 @@ export function Overview() {
         <div className="yn-card">
           <h3>Entity share by subgrove</h3>
           <div className="sub" style={{ marginBottom: 12 }}>how activity is distributed across YieldNest's Ethereum subgroves</div>
-          <SubgroveShareChart slices={slices} />
+          {Object.keys(counts).length === 0 ? <ProofLoader /> : <SubgroveShareChart slices={slices} />}
           <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
         </div>
         <LiveFeed subgrove="yieldnest-vaults-eth" />

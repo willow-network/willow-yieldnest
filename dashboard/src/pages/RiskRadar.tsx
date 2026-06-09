@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
+import { ProofLoader } from "../yieldnest/ProofLoader";
 import { useDeposits, assetsNumberHeuristic } from "../yieldnest/useDeposits";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
 import {
@@ -103,7 +104,7 @@ export function RiskRadar() {
             all axes normalised 0–100 · higher is healthier (more activity, more spread)
           </div>
           {!loaded ? (
-            <p className="yn-placeholder">loading…</p>
+            <ProofLoader />
           ) : (
             <ResponsiveContainer width="100%" height={340}>
               <RadarChart data={metrics} margin={{ top: 10, right: 40, bottom: 10, left: 40 }}>

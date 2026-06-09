@@ -1,5 +1,6 @@
 import { useDeposits, Deposit, assetsNumberHeuristic } from "./useDeposits";
 import { ProofBadge } from "./ProofBadge";
+import { ProofLoader } from "./ProofLoader";
 import { CopyAddress } from "./CopyAddress";
 
 export function LiveFeed({ subgrove }: { subgrove: string }) {
@@ -16,7 +17,7 @@ export function LiveFeed({ subgrove }: { subgrove: string }) {
       <div className="sub" style={{ marginBottom: 12 }}>
         streaming from <code>{subgrove}</code> · new rows arrive as the indexer decodes them
       </div>
-      {s.status === "loading" && <p className="yn-placeholder">waiting for first batch…</p>}
+      {s.status === "loading" && <ProofLoader />}
       {s.status === "error" && <p className="yn-placeholder">error: {s.message}</p>}
       {s.status === "ok" && latest.length === 0 && (
         <p className="yn-placeholder">no entities yet</p>
