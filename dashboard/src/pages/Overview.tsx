@@ -8,8 +8,6 @@ import { TipPulse } from "../yieldnest/TipPulse";
 
 const SUBGROVE_IDS = [
   "yieldnest-vaults-eth",
-  "yieldnest-vaults-bnb",
-  "yieldnest-vaults-l2",
   "yieldnest-restaking-eth",
   "yieldnest-liquidity",
   "yieldnest-governance",
@@ -17,8 +15,6 @@ const SUBGROVE_IDS = [
 
 const SUBGROVE_QUERIES: Record<string, string> = {
   "yieldnest-vaults-eth": `{ deposits(first:1000){id} transfers(first:1000){id} }`,
-  "yieldnest-vaults-bnb": `{ deposits(first:1000){id} transfers(first:1000){id} }`,
-  "yieldnest-vaults-l2":  `{ deposits(first:1000){id} transfers(first:1000){id} }`,
   "yieldnest-restaking-eth": `{ totalETHStakedUpdateds(first:1000){id} rewardsProcesseds(first:1000){id} ethWithdrawns(first:1000){id} }`,
   "yieldnest-liquidity": `{ swaps(first:1000){id} mints(first:1000){id} burns(first:1000){id} }`,
   "yieldnest-governance": `{ transfers(first:1000){id} }`,
@@ -133,7 +129,7 @@ export function Overview() {
         </div>
         <div className="yn-card">
           <h3>Entity share by subgrove</h3>
-          <div className="sub" style={{ marginBottom: 12 }}>how activity is distributed across YieldNest's six subgroves</div>
+          <div className="sub" style={{ marginBottom: 12 }}>how activity is distributed across YieldNest's Ethereum subgroves</div>
           <SubgroveShareChart slices={slices} />
           <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
         </div>

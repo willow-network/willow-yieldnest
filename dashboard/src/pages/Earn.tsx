@@ -92,17 +92,16 @@ export function Earn() {
         <tbody>
           {VAULTS.map(v => {
             const isLive = registered.has(v.subgrove);
-            const onEth = v.chainId === 1;
-            const tvlCell = onEth && vaultUsd[v.symbol] !== undefined
+            const tvlCell = vaultUsd[v.symbol] !== undefined
               ? fmtUsd(vaultUsd[v.symbol])
-              : onEth ? "—" : "—";
-            const assetsCell = onEth && vaultAssets[v.symbol]
+              : "—";
+            const assetsCell = vaultAssets[v.symbol]
               ? `${vaultAssets[v.symbol].amt.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${vaultAssets[v.symbol].underlying}`
-              : <span className="yn-placeholder">needs {v.chainId === 56 ? "BNB" : "chain"} RPC</span>;
+              : <span className="yn-placeholder">—</span>;
             return (
               <tr key={v.symbol}>
                 <td><strong>{v.symbol}</strong> <span className="yn-placeholder">· {v.name}</span></td>
-                <td>{onEth ? "Ethereum" : v.chainId === 56 ? "BNB" : `chain ${v.chainId}`}</td>
+                <td>Ethereum</td>
                 <td>{tvlCell}</td>
                 <td>{assetsCell}</td>
                 <td>{v.subgrove === "yieldnest-vaults-eth" && eth.status === "ok"

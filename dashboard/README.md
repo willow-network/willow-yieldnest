@@ -21,10 +21,15 @@ full JSON response.
 
 Configs live in the sibling `../protocol/` directory. This app queries:
 
-- `yieldnest-vaults-eth` / `-bnb` / `-l2` — vault events (Deposit / Withdraw / Transfer)
+- `yieldnest-vaults-eth` — vault events (Deposit / Withdraw / Transfer) for the
+  five Ethereum vaults (ynETH, ynLSDe, ynETHx, ynUSDx, ynRWAx)
 - `yieldnest-restaking-eth` — StakingNodesManager, RewardsDistributor, EL/CL receivers
 - `yieldnest-liquidity` — DEX pools (WASM handler pending)
-- `yieldnest-governance` — YND ERC-20 token
+- `yieldnest-governance` — YND ERC-20 token (GKR-proven voting power)
+
+All subgroves index Ethereum mainnet (L1). The BSC (`-bnb`) and L2 (`-l2`) vault
+subgroves were dropped — those were the only chains we can't beacon-verify and
+they accounted for ~95% of the RPC bill.
 
 ## Dev
 
@@ -55,30 +60,25 @@ npm run typecheck
 
 ## Deploy to yieldnest.willow.tech
 
-Static files are served from `/var/www/yieldnest/` on the EC2 host
-(`3.209.237.230`). Nginx routes `/willow-api/*` and `/indexer-gql/*` to
-the validator API (3031) and yieldnest indexer (3051) respectively, so
-the dashboard stays same-origin — no CORS needed.
+Served from **Cloudflare Pages**, git-connected to this repo
+(`willow-network/willow-yieldnest`) with `dashboard/` as the build root and
+`origin/main` as the production branch. Push to `main` and CF Pages builds and
+deploys automatically — there is no EC2 / nginx / rsync step anymore.
 
-Deploy flow (from this directory):
+The browser calls the public endpoints directly (all CORS-open), baked in at
+build time via `.env.production`:
 
-```bash
-VITE_WILLOW_API=/willow-api VITE_INDEXER_GQL=/indexer-gql npm run build
-rsync -azP dist/ ubuntu@3.209.237.230:/var/www/yieldnest/
+```
+VITE_WILLOW_API=https://api.willow.tech
+VITE_INDEXER_GQL=https://indexer.willow.tech
+VITE_ETH_RPC=https://ethereum.publicnode.com
 ```
 
-The `VITE_*` env vars bake the same-origin proxy paths into the bundle.
-Never deploy with `VITE_WILLOW_API=https://api.willow.tech` — that hits
-cross-origin and breaks on CORS (and we explicitly don't want CORS
-headers on `api.willow.tech` because it breaks the main explorer).
-
-Nginx serves the new files immediately; hard-refresh the browser to
-clear the index.html cache (`Cache-Control: no-cache` prevents stale
-HTML but asset bundles are hashed so no conflict).
+`public/_redirects` provides the SPA fallback. `@willow/sdk` is vendored under
+`dashboard/vendor/willow-sdk/` so CF (which has no sibling `../../willow`
+checkout) can build it.
 
 ## Status
 
-All 6 pages render live data from the indexer. Next up:
-- BNB + Optimism chain support for the currently-empty bnb/l2 subgroves
+All 6 pages render live data from the indexer (Ethereum L1 only). Next up:
 - WASM handler for `yieldnest-liquidity` (real pool math)
-- Deploy behind `api.willow.tech` (AWS) for a shared demo endpoint
