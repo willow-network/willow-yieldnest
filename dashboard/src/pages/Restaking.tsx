@@ -117,8 +117,7 @@ export function Restaking() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>Restaking</h1>
-      <p><SubgroveStatus id="yieldnest-restaking-eth" /></p>
-      <p><SubgroveStatus id="yieldnest-vaults-eth" /></p>
+      <p><SubgroveStatus id={["yieldnest-restaking-eth", "yieldnest-vaults-eth"]} /></p>
       <p className="yn-placeholder">
         Native ETH staked across YieldNest's StakingNodesManager (authoritative
         snapshot) plus restaking-share movements on vault tokens (ynETH, ynLSDe,

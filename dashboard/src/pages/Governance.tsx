@@ -3,7 +3,6 @@ import { ProofBadge } from "../yieldnest/ProofBadge";
 import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
-import { getGkrState, type GkrState } from "../yieldnest/api";
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar,
   CartesianGrid, XAxis, YAxis, Tooltip,
@@ -26,32 +25,6 @@ const tooltipStyle = {
   color: "var(--yn-text)",
   fontSize: 12,
 };
-
-function useGkrVotingPower(): { data: GkrState | null; loading: boolean; error: string | null } {
-  const [data, setData] = useState<GkrState | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    let alive = true;
-    const tick = async () => {
-      try {
-        const s = await getGkrState("yieldnest-governance");
-        if (!alive) return;
-        setData(s);
-        setError(null);
-      } catch (e) {
-        if (!alive) return;
-        setError(String(e));
-      } finally {
-        if (alive) setLoading(false);
-      }
-    };
-    tick();
-    const id = setInterval(tick, 6000);
-    return () => { alive = false; clearInterval(id); };
-  }, []);
-  return { data, loading, error };
-}
 
 const PAGE_SIZE = 1000;
 
@@ -91,105 +64,8 @@ function short(addr: string) {
   return `${addr.slice(0, 10)}…${addr.slice(-6)}`;
 }
 
-function VerifiedVotingPowerCard({
-  state,
-  loading,
-  error,
-}: {
-  state: GkrState | null;
-  loading: boolean;
-  error: string | null;
-}) {
-  const positive = (state?.balances ?? []).filter((b) => {
-    try {
-      return BigInt(b.balance) > 0n;
-    } catch {
-      return false;
-    }
-  });
-  const total = positive.reduce((acc, b) => acc + Number(BigInt(b.balance)) / 1e18, 0);
-  const top = [...positive]
-    .sort((a, b) => {
-      try {
-        const diff = BigInt(b.balance) - BigInt(a.balance);
-        return diff > 0n ? 1 : diff < 0n ? -1 : 0;
-      } catch {
-        return 0;
-      }
-    })
-    .slice(0, 10);
-
-  return (
-    <div className="yn-card" style={{ marginTop: 16 }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-        <h3 style={{ margin: 0 }}>Voting power</h3>
-        <span
-          className="yn-proof-badge"
-          title="Every block's balances are anchored by a cryptographic proof that Willow validators verify, with each block's state pinned to the previous block's committed state."
-        >
-          Willow verified
-        </span>
-      </div>
-      <div className="sub" style={{ marginTop: 8 }}>
-        per-address YND balances across tracked governance addresses ·{" "}
-        {state ? `at block ${state.last_block.toLocaleString()}` : "awaiting first verified block"}
-      </div>
-
-      {loading && !state && <p className="yn-placeholder" style={{ marginTop: 12 }}>loading…</p>}
-      {error && <p className="yn-placeholder" style={{ marginTop: 12, color: "#c96" }}>error: {error}</p>}
-
-      {state && positive.length === 0 && (
-        <p className="yn-placeholder" style={{ marginTop: 12 }}>
-          No tracked addresses with non-zero balance yet at block {state.last_block.toLocaleString()}.
-        </p>
-      )}
-
-      {state && positive.length > 0 && (
-        <>
-          <div
-            className="yn-grid"
-            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", marginTop: 16 }}
-          >
-            <div>
-              <div className="big">{positive.length}</div>
-              <div className="sub">holders with positive balance</div>
-            </div>
-            <div>
-              <div className="big">{total.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-              <div className="sub">YND summed across tracked addresses</div>
-            </div>
-          </div>
-
-          <table className="yn-table" style={{ marginTop: 16 }}>
-            <thead>
-              <tr>
-                <th>Address</th>
-                <th style={{ textAlign: "right" }}>YND</th>
-              </tr>
-            </thead>
-            <tbody>
-              {top.map((b) => {
-                const ynd = Number(BigInt(b.balance)) / 1e18;
-                return (
-                  <tr key={b.address}>
-                    <td><CopyAddress addr={b.address} /></td>
-                    <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
-                      {ynd.toLocaleString(undefined, { maximumFractionDigits: 4 })}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </>
-      )}
-    </div>
-  );
-}
-
 export function Governance() {
   const s = useGovernanceTransfers();
-  const gkr = useGkrVotingPower();
   const xfers = s.status === "ok" ? s.transfers : [];
 
   // Net balance per address (accounts for mint/burn via the zero address).
@@ -237,7 +113,7 @@ export function Governance() {
         and (when available) delegation events.
       </p>
 
-      <VerifiedVotingPowerCard state={gkr.data} loading={gkr.loading} error={gkr.error} />
+      {/* Voting-power card hidden until GKR proving is fixed (#597/#598) — gov runs ConsensusExecution, no /gkr-state */}
 
       <div className="yn-grid" style={{ marginTop: 24 }}>
         <div className="yn-card">
