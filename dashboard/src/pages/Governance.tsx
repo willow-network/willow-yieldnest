@@ -26,8 +26,6 @@ const tooltipStyle = {
   fontSize: 12,
 };
 
-const PAGE_SIZE = 1000;
-
 function useGovernanceTransfers(): State {
   const [s, setS] = useState<State>({ status: "loading" });
   useEffect(() => {
@@ -37,7 +35,7 @@ function useGovernanceTransfers(): State {
       try {
         const d = await runQuery<{ transfers: Transfer[] }>(
           "yieldnest-governance",
-          `{ transfers(first: ${PAGE_SIZE}) { id from to value blockNumber } }`,
+          `{ transfers(first: 500, orderBy: blockNumber, orderDirection: desc) { id from to value blockNumber } }`,
         );
         if (!alive) return;
         setS({ status: "ok", transfers: d.transfers ?? [] });

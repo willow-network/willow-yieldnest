@@ -39,7 +39,7 @@ function useRestakingData(): State {
         const [vaults, restaking] = await Promise.all([
           runQuery<{ transfers: Transfer[] }>(
             "yieldnest-vaults-eth",
-            `{ transfers(first: ${PAGE_SIZE}) { id from to value blockNumber } }`,
+            `{ transfers(first: 400, orderBy: blockNumber, orderDirection: desc) { id from to value blockNumber } }`,
           ).catch(e => {
             if (e instanceof NoIndexingProgressError) return { transfers: [] };
             throw e;
