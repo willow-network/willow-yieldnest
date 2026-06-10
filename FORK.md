@@ -8,7 +8,7 @@ This guide takes you from a fresh fork to a running, verified view of your own c
 
 - **Node 18+** and **npm** (for the dashboard).
 - **Rust** (stable) — for the `register-rs` subgrove registration tool under `protocol/scripts/`.
-- A **Willow node + indexer** to run against. To index your own contracts you run a local Willow node and indexer; the dashboard talks to them.
+- A **Willow node + indexer** to run against. To index your own contracts you run a local Willow node and indexer; the dashboard talks to them. These binaries come from the core `willow` repo, which is not yet public.
 - An **Ethereum RPC endpoint** (e.g. a free Alchemy or Infura key) for the dashboard's live `totalAssets()` / chain-tip calls. A public endpoint works but is rate-limited.
 
 > `register-rs` depends on the Willow Rust SDK (`willow-sdk`), pulled from [`willow-network/willow-sdk-rust`](https://github.com/willow-network/willow-sdk-rust). The dashboard vendors the TypeScript SDK at `dashboard/vendor/willow-sdk/` so its build needs no extra setup.

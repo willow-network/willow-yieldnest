@@ -5,6 +5,16 @@ set -euo pipefail
 YN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # The core willow repo is expected as a sibling clone of willow-yieldnest.
 # Path: willow-yieldnest/protocol/scripts/bringup_demo.sh → ../../../willow
+if [[ ! -d "$YN_ROOT/../../willow" ]]; then
+  echo "error: core willow repo not found at $(cd "$YN_ROOT/../.." && pwd)/willow" >&2
+  echo >&2
+  echo "This script boots a local Willow devnet, which needs the core willow repo" >&2
+  echo "(not yet public) cloned as a sibling of willow-yieldnest." >&2
+  echo "To see this stack running against the hosted network instead, visit" >&2
+  echo "https://yieldnest.willow.tech or run the dashboard locally against the" >&2
+  echo "hosted endpoints — see protocol/README.md." >&2
+  exit 1
+fi
 WILLOW_ROOT="$(cd "$YN_ROOT/../../willow" && pwd)"
 NODE_URL="http://localhost:26657"
 API_URL="http://localhost:3031"

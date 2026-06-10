@@ -27,7 +27,22 @@ A subgrove is a declarative description of what to index — a set of contracts,
 | `yieldnest-liquidity`     | Liquidity pools *(awaiting a pool-math handler)*  |
 | `yieldnest-governance`    | YND ERC-20 transfers                              |
 
+## Run the dashboard against the hosted network
+
+The subgroves above are registered and indexed on Willow's hosted network, so the dashboard runs locally with no other services:
+
+```bash
+cd ../dashboard
+cp .env.example .env.local
+# in .env.local:
+#   VITE_WILLOW_API=https://api.willow.tech
+#   VITE_INDEXER_GQL=https://indexer.willow.tech
+npm install && npm run dev   # http://127.0.0.1:5273
+```
+
 ## Bring up a local demo
+
+Running the full stack locally needs the core `willow` binaries (devnet scripts and `willow-indexer`), which are not yet public. If you have access to the core repo, clone it as a sibling of this one, then:
 
 ```bash
 ./scripts/bringup_demo.sh
@@ -42,4 +57,4 @@ cp .env.example .env.local
 npm install && npm run dev   # http://127.0.0.1:5273
 ```
 
-`bringup_demo.sh` runs against a local Willow devnet and needs the core [`willow`](https://github.com/willow-network/willow) binaries. To adapt any of this to your own contracts and network, see [`../FORK.md`](../FORK.md).
+To adapt any of this to your own contracts and network, see [`../FORK.md`](../FORK.md).
