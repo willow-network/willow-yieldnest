@@ -33,6 +33,21 @@ export function Layout() {
       <main className="yn-container">
         <Outlet />
       </main>
+      <footer className="yn-footer">
+        <span>Live, indexed on-chain data — every result Willow verified.</span>
+        <nav className="yn-footer-links" aria-label="Footer">
+          <a href="https://yieldnest.fi" target="_blank" rel="noopener noreferrer">yieldnest.fi</a>
+          <a href="https://willow.tech" target="_blank" rel="noopener noreferrer">willow.tech</a>
+          <a href="https://github.com/willow-network/willow-yieldnest" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://explorer.willow.tech" target="_blank" rel="noopener noreferrer" className="yn-explorer-pill">
+            Block explorer
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M7 17 17 7" />
+              <path d="M7 7h10v10" />
+            </svg>
+          </a>
+        </nav>
+      </footer>
     </>
   );
 }

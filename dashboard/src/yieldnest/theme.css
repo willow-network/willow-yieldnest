@@ -144,6 +144,43 @@ body {
 }
 .yn-theme-toggle:hover { border-color: var(--yn-accent); color: var(--yn-accent); }
 
+.yn-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 16px 32px 32px;
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--yn-text-dim);
+  font-size: 12px;
+}
+.yn-footer-links { display: inline-flex; align-items: center; gap: 20px; }
+.yn-footer-links a {
+  color: var(--yn-accent);
+  font-size: 13px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.yn-footer-links a:hover { color: var(--yn-accent-glow); }
+.yn-explorer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  background: var(--yn-accent);
+  white-space: nowrap;
+}
+.yn-footer-links a.yn-explorer-pill { color: #fff; text-decoration: none; }
+[data-theme='dark'] .yn-footer-links a.yn-explorer-pill { color: var(--yn-bg); }
+.yn-footer-links a.yn-explorer-pill:hover { background: var(--yn-accent-glow); }
+
 @media (max-width: 768px) {
   .yn-header {
     padding: 14px 16px;

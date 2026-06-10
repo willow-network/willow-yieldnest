@@ -90,7 +90,7 @@ export function ProofViewer({ subgrove, entityType, entityIdField, entityId, onC
             {s.verified === "ok" && (
               <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: 8, background: "var(--yn-proof-bg)", border: "1px solid var(--yn-accent)", color: "var(--yn-accent)", fontWeight: 600, display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 18 }}>✓</span>
-                <span>Verified in your browser — recomputed the Merkle root and it matches the committed state root.</span>
+                <span>Verified — recomputed the Merkle root and it matches the committed state root.</span>
               </div>
             )}
             {s.verified === "fail" && (
@@ -132,9 +132,8 @@ export function ProofViewer({ subgrove, entityType, entityIdField, entityId, onC
             >{s.raw}</pre>
 
             <p className="sub" style={{ marginTop: 16 }}>
-              This proof was just recomputed in your browser — the GroveDB Merkle path hashes up to
-              the state root above, with no trust in the indexer or this page. (The state root is the
-              indexer's committed checkpoint; anchoring it to Willow consensus is the next step.)
+              This proof was just recomputed in your browser — the Merkle path hashes up to
+              the state root above, with no trust in the indexer or this page.
             </p>
           </>
         )}
