@@ -13,8 +13,7 @@
 //! no-op. To actually change indexing config you have to `reset` and then
 //! `register`, which is exactly the flow these subcommands support. The
 //! server side bumps `deployment_epoch` on every dereg so indexers notice
-//! the change and restart their pipelines (see
-//! `crates/indexer-node/src/lib.rs::restart_changed_subgroves`).
+//! the change and restart their pipelines.
 
 use anyhow::{anyhow, Context, Result};
 use clap::{Parser, Subcommand};
@@ -245,10 +244,9 @@ fn build_template_config(
         .iter()
         .map(|ds| evm(ds).address.to_canonical_string())
         .collect();
-    // SDK migrated `parameters` from `HashMap<String, Value>` to a
-    // JSON-encoded `Vec<u8>` (#248 bincode wire format work). Encode
-    // the manifest's HashMap to bytes so the consensus tx carries the
-    // same payload byte-for-byte.
+    // The SDK encodes `parameters` as a JSON-encoded `Vec<u8>`. Encode the
+    // manifest's HashMap to bytes so the consensus tx carries the same payload
+    // byte-for-byte.
     let parameters_bytes: Vec<u8> =
         serde_json::to_vec(&cfg.parameters).unwrap_or_else(|_| b"{}".to_vec());
     willow_sdk::types::TemplateSubgroveConfig {

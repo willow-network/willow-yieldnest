@@ -1,6 +1,5 @@
-// Thin client for the Willow REST API. The @willow/sdk TypeScript client
-// doesn't yet expose a listSubgroves helper, so we call /subgroves directly.
-// Swap this module out for sdk calls once that lands.
+// Thin client for the Willow REST API — calls /subgroves directly (the
+// @willow/sdk TypeScript client doesn't expose a listSubgroves helper yet).
 
 // In dev, go through Vite's /willow-api proxy (see vite.config.ts) to dodge CORS.
 // In prod, point VITE_WILLOW_API at the real REST endpoint.

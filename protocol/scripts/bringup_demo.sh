@@ -54,8 +54,10 @@ done
 set -e
 [[ $READY -eq 1 ]] || { echo "network never became ready"; exit 1; }
 
-echo "→ registering 6 subgroves as did:willow:validator1 (pre-funded genesis DID)"
+echo "→ registering subgroves as did:willow:validator1 (pre-funded genesis DID)"
 cd "$YN_ROOT/scripts/register-rs"
+# --key-hex below is the public RFC 8032 §7.1 test vector (the well-known devnet
+# validator1 seed, pre-funded at genesis). Devnet only — never use on a real network.
 cargo run --release --quiet -- \
   --node "$NODE_URL" \
   --api  "$API_URL" \

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
-// Hardcoded per-vault metadata. Real YieldNest dashboard uses Chainlink; for
-// the demo we call totalAssets() on each ERC-4626 and multiply by a spot
-// USD price for the underlying.
+// Per-vault TVL: call totalAssets() on each ERC-4626 vault and multiply by a
+// spot USD price for the underlying.
 type VaultDef = {
   symbol: string;
   address: string;

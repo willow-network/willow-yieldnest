@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 export type Theme = 'light' | 'dark';
 
-const STORAGE_KEY = 'willow-explorer-theme';
+const STORAGE_KEY = 'yieldnest-theme';
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'light';

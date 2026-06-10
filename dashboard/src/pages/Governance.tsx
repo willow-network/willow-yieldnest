@@ -112,8 +112,6 @@ export function Governance() {
         and (when available) delegation events.
       </p>
 
-      {/* Voting-power card hidden until GKR proving is fixed (#597/#598) — gov runs ConsensusExecution, no /gkr-state */}
-
       <div className="yn-grid" style={{ marginTop: 24 }}>
         <div className="yn-card">
           <h3>Transfer events</h3>

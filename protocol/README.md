@@ -1,87 +1,47 @@
-# willow-yieldnest / protocol
+# protocol
 
-Private partner configuration for YieldNest × Willow (subgroves, schemas,
-bringup scripts, indexer config). The dashboard that consumes these
-subgroves lives in the sibling `../dashboard/` directory.
-
-Companion to:
-- **`willow-network/willow`** — core protocol (expected as a sibling clone)
+The Willow indexing layer behind the dashboard: subgrove manifests, GraphQL schemas, and the indexer config. The dashboard that consumes these lives in [`../dashboard/`](../dashboard).
 
 ## Layout
 
 ```
 .
-├── subgroves/          # 6 subgrove registration manifests (JSON)
-├── schemas/            # GraphQL SDL entity schemas per subgrove family
+├── subgroves/        # subgrove registration manifests (JSON)
+├── schemas/          # GraphQL SDL entity schemas, per subgrove family
 ├── scripts/
-│   ├── bringup_demo.sh # one-shot: devnet + subgrove registration
-│   └── register-rs/    # Rust binary that registers all 6 via willow-sdk
+│   ├── bringup_demo.sh   # one-shot: local devnet + subgrove registration
+│   └── register-rs/      # Rust tool that registers/funds subgroves via willow-sdk
 ├── indexer/
-│   └── indexer.toml    # willow-indexer config (does NOT track grovedb/)
-└── wasm-handlers/      # (stub) custom transformation modules
+│   └── indexer.toml      # willow-indexer config
+└── wasm-handlers/        # custom transformation modules (e.g. pool math)
 ```
 
 ## Subgroves
 
-All registered with `ExecutionMode::GkrExecution`. Every indexer submission
-carries a GKR proof verified on-chain.
+A subgrove is a declarative description of what to index — a set of contracts, their ABIs, and the events to decode. Each manifest under `subgroves/` has a matching GraphQL schema under `schemas/`. The live set:
 
-| Subgrove                   | Chain(s)       | Covers                                         |
-|----------------------------|----------------|------------------------------------------------|
-| `yieldnest-vaults-eth`     | Ethereum       | ynETH, ynLSDe, ynETHx, ynUSDx, ynRWAx          |
-| `yieldnest-vaults-bnb`     | BNB Chain      | ynBNB, ynBNBx, ynBTCk *(awaiting BNB RPC)*     |
-| `yieldnest-vaults-l2`      | OP/Base/etc    | MAX vault mirrors *(awaiting L2 RPC wiring)*   |
-| `yieldnest-restaking-eth`  | Ethereum       | StakingNodesManager, EL/CL receivers           |
-| `yieldnest-liquidity`      | Ethereum       | Curve/Uniswap pools *(awaiting WASM handler)*  |
-| `yieldnest-governance`     | Ethereum       | YND ERC-20 transfers, delegations              |
-| `uniswap-v3-eth-usdc` *    | Ethereum       | Generic example — V3 ETH/USDC pool, ETH price  |
+| Subgrove                  | Covers                                            |
+|---------------------------|---------------------------------------------------|
+| `yieldnest-vaults-eth`    | ynETH, ynLSDe, ynETHx, ynUSDx, ynRWAx (ERC-4626)  |
+| `yieldnest-restaking-eth` | StakingNodesManager + restaking receivers         |
+| `yieldnest-liquidity`     | Liquidity pools *(awaiting a pool-math handler)*  |
+| `yieldnest-governance`    | YND ERC-20 transfers                              |
 
-\* `uniswap-v3-eth-usdc` is **not** partner-specific. It lives here only
-because this directory is what `register-rs` auto-registers on devnet
-bringup; until Willow has its own generic-defaults registration pathway
-this is the simplest persistence path. Move out when that's built.
-
-Live state: vaults-eth + governance catching up to tip; restaking-eth at tip
-but low-traffic so rarely emits. BNB/L2 pipelines idle pending cross-chain
-RPC support in Willow.
+`uniswap-v3-eth-usdc.json` is a generic, non-YieldNest example manifest (a Uniswap V3 ETH/USDC pool), kept as a reference.
 
 ## Bring up a local demo
 
 ```bash
 ./scripts/bringup_demo.sh
-# devnet starts (3 validator nodes), 6 subgroves register as
-# did:willow:validator1, then waits. Ctrl-C to stop.
+# starts a local devnet, registers the subgroves, then waits. Ctrl-C to stop.
 
 # in another shell — start the indexer:
-../willow/target/release/willow-indexer start \
-  --config ./indexer/indexer.toml
+willow-indexer start --config ./indexer/indexer.toml
 
 # in another shell — start the dashboard:
 cd ../dashboard
-cp .env.example .env.local   # paste Alchemy key
-npm install && npm run dev
-# http://127.0.0.1:5273
+cp .env.example .env.local
+npm install && npm run dev   # http://127.0.0.1:5273
 ```
 
-## Secrets
-
-The indexer config uses hardcoded public RPC endpoints. For paid providers
-(Alchemy, Infura, QuickNode) put the URL in `indexer.toml` directly. This
-repo is private so that's acceptable. If this repo is ever opened up,
-move RPC URLs to env vars first.
-
-## Upstream blockers
-
-Tracked so partner engineers can file issues on willow-network/willow:
-- **`SubgroveIndexingInfo` missing `description` field** — registration passes
-  a description but read path in `crates/storage/src/permissions.rs:353`
-  hardcodes `""`. Needs a schema + migration.
-- **GraphQL executor selection-merge bug** — aliased queries like
-  `allDeposits: deposits` merge field selections with the non-aliased
-  `deposits`. Workaround: split into separate top-level queries.
-- **Cross-chain RPC support** — indexer.toml only has `eth_rpc_endpoints`;
-  BNB / OP / other L2 pipelines can't fetch.
-- **Subgrove funding** — our subgroves are unfunded, so consensus-side
-  block-update submissions fail (`Subgrove has insufficient balance`).
-  Historical GraphQL works, but the consensus checkpoint story is partial.
-  `register-rs` needs a `--fund` flag.
+`bringup_demo.sh` runs against a local Willow devnet and needs the core [`willow`](https://github.com/willow-network/willow) binaries. To adapt any of this to your own contracts and network, see [`../FORK.md`](../FORK.md).

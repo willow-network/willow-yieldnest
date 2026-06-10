@@ -1,5 +1,5 @@
-// YieldNest subgrove IDs — must match partners/yieldnest/subgroves/*.json in the
-// willow repo. Keep in sync.
+// Subgrove IDs — must match the manifests in protocol/subgroves/ and the
+// indexer's subgrove_filter.
 export const SUBGROVES = {
   vaultsEth:     "yieldnest-vaults-eth",
   restakingEth:  "yieldnest-restaking-eth",
