@@ -1,6 +1,8 @@
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
 import { ProofLoader } from "../yieldnest/ProofLoader";
 import { ProofBadge } from "../yieldnest/ProofBadge";
+import { VerifyAllBadge } from "../yieldnest/VerifyAllBadge";
+import { useVerify } from "../yieldnest/Verify";
 import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
@@ -65,6 +67,7 @@ function short(addr: string) {
 
 export function Governance() {
   const s = useGovernanceTransfers();
+  const { verify } = useVerify();
   const xfers = s.status === "ok" ? s.transfers : [];
 
   // Net balance per address (accounts for mint/burn via the zero address).
@@ -96,7 +99,7 @@ export function Governance() {
   let cum = 0;
   const cumData = sorted.map(t => {
     cum += weiToYnd(t.value);
-    return { block: Number(t.blockNumber), cumulative: Number(cum.toFixed(2)) };
+    return { block: Number(t.blockNumber), cumulative: Number(cum.toFixed(2)), id: t.id };
   });
 
   const recent = [...xfers]
@@ -138,18 +141,19 @@ export function Governance() {
             s.status === "loading" ? <ProofLoader /> : <p className="yn-placeholder">no transfers indexed yet</p>
           ) : (
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }} style={{ cursor: "pointer" }}>
                 <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="block" stroke="var(--yn-text-dim)" fontSize={11}
                        tickFormatter={(v) => v.toLocaleString()} />
                 <YAxis stroke="var(--yn-text-dim)" fontSize={11} />
                 <Tooltip contentStyle={tooltipStyle}
                          labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`} />
-                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false}
+                  activeDot={{ r: 5, onClick: (_e: any, pl: any) => { const id = pl?.payload?.id; if (id) verify({ subgrove: "yieldnest-governance", entityType: "transfer", entityId: id }); } }} />
               </LineChart>
             </ResponsiveContainer>
           )}
-          <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
+          <div style={{ marginTop: 10 }}><VerifyAllBadge subgrove="yieldnest-governance" query="{ transfers(first:200){ id } }" label="YND transfers" /></div>
         </div>
 
         <div className="yn-card">
@@ -170,7 +174,7 @@ export function Governance() {
               </BarChart>
             </ResponsiveContainer>
           )}
-          <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
+          <div style={{ marginTop: 10 }}><VerifyAllBadge subgrove="yieldnest-governance" query="{ transfers(first:200){ id } }" label="YND transfers" /></div>
         </div>
       </div>
 
