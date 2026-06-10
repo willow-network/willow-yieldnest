@@ -1,6 +1,7 @@
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
 import { ProofLoader } from "../yieldnest/ProofLoader";
 import { ProofBadge } from "../yieldnest/ProofBadge";
+import { VerifyAllBadge } from "../yieldnest/VerifyAllBadge";
 import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
@@ -149,7 +150,7 @@ export function Governance() {
               </LineChart>
             </ResponsiveContainer>
           )}
-          <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
+          <div style={{ marginTop: 10 }}><VerifyAllBadge subgrove="yieldnest-governance" query="{ transfers(first:200){ id } }" label="YND transfers" /></div>
         </div>
 
         <div className="yn-card">
@@ -170,7 +171,7 @@ export function Governance() {
               </BarChart>
             </ResponsiveContainer>
           )}
-          <div style={{ marginTop: 10 }}><span className="yn-proof-badge">Willow verified</span></div>
+          <div style={{ marginTop: 10 }}><VerifyAllBadge subgrove="yieldnest-governance" query="{ transfers(first:200){ id } }" label="YND transfers" /></div>
         </div>
       </div>
 
