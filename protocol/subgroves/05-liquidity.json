@@ -3,7 +3,7 @@
   "description": "Ethereum DEX liquidity baseline (Uniswap V2 USDC/WETH) \u2014 live market activity alongside YieldNest vaults",
   "mode": {
     "BlockchainIndexing": {
-      "execution_mode": "IndexerExecution",
+      "execution_mode": "ConsensusExecution",
       "retention_window": "Indefinite",
       "indexer_config": {
         "min_indexers": 2,

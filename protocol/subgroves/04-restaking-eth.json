@@ -3,7 +3,7 @@
   "description": "YieldNest native restaking: StakingNodesManager, RewardsDistributor, EL/CL receivers",
   "mode": {
     "BlockchainIndexing": {
-      "execution_mode": "IndexerExecution",
+      "execution_mode": "ConsensusExecution",
       "retention_window": "Indefinite",
       "indexer_config": {
         "min_indexers": 3,

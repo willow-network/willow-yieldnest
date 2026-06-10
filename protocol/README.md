@@ -27,8 +27,6 @@ A subgrove is a declarative description of what to index — a set of contracts,
 | `yieldnest-liquidity`     | Liquidity pools *(awaiting a pool-math handler)*  |
 | `yieldnest-governance`    | YND ERC-20 transfers                              |
 
-`uniswap-v3-eth-usdc.json` is a generic, non-YieldNest example manifest (a Uniswap V3 ETH/USDC pool), kept as a reference.
-
 ## Bring up a local demo
 
 ```bash

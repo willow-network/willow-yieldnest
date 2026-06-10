@@ -3,7 +3,7 @@
   "description": "YieldNest vault events on Ethereum \u2014 ynETH, ynLSDe, ynETHx, ynUSDx, ynRWAx",
   "mode": {
     "BlockchainIndexing": {
-      "execution_mode": "IndexerExecution",
+      "execution_mode": "ConsensusExecution",
       "retention_window": "Indefinite",
       "indexer_config": {
         "min_indexers": 3,
