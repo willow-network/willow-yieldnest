@@ -55,7 +55,9 @@ body {
 .yn-logo img { height: 28px; width: auto; display: block; }
 [data-theme='light'] .yn-logo img { filter: invert(1) hue-rotate(180deg); }
 .yn-powered { font-size: 12px; color: var(--yn-text-dim); }
+.yn-powered a { text-decoration: none; }
 .yn-powered strong { color: var(--yn-accent); }
+.yn-powered a:hover strong { color: var(--yn-accent-glow); text-decoration: underline; }
 
 .yn-nav { display: flex; gap: 24px; }
 .yn-nav a {

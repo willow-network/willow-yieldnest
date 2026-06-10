@@ -19,7 +19,7 @@ export function Layout() {
           <NavLink to="/governance"  className={({ isActive }) => isActive ? "active" : ""}>Governance</NavLink>
         </nav>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div className="yn-powered">Powered by <strong>Willow</strong> · all data is cryptographically verifiable</div>
+          <div className="yn-powered">Powered by <a href="https://willow.tech" target="_blank" rel="noopener noreferrer"><strong>Willow</strong></a> · all data is cryptographically verifiable</div>
           <button
             className="yn-theme-toggle"
             onClick={toggle}
@@ -36,7 +36,7 @@ export function Layout() {
       <footer className="yn-footer">
         <span>Live, indexed on-chain data — every result Willow verified.</span>
         <nav className="yn-footer-links" aria-label="Footer">
-          <a href="https://yieldnest.fi" target="_blank" rel="noopener noreferrer">yieldnest.fi</a>
+          <a href="https://yieldnest.finance" target="_blank" rel="noopener noreferrer">yieldnest.finance</a>
           <a href="https://willow.tech" target="_blank" rel="noopener noreferrer">willow.tech</a>
           <a href="https://github.com/willow-network/willow-yieldnest" target="_blank" rel="noopener noreferrer">GitHub</a>
           <a href="https://explorer.willow.tech" target="_blank" rel="noopener noreferrer" className="yn-explorer-pill">
