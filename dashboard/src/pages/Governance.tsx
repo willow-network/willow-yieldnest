@@ -141,15 +141,15 @@ export function Governance() {
             s.status === "loading" ? <ProofLoader /> : <p className="yn-placeholder">no transfers indexed yet</p>
           ) : (
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }} style={{ cursor: "pointer" }}
-                onClick={(e: any) => { const id = e?.activePayload?.[0]?.payload?.id; if (id) verify({ subgrove: "yieldnest-governance", entityType: "transfer", entityId: id }); }}>
+              <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }} style={{ cursor: "pointer" }}>
                 <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="block" stroke="var(--yn-text-dim)" fontSize={11}
                        tickFormatter={(v) => v.toLocaleString()} />
                 <YAxis stroke="var(--yn-text-dim)" fontSize={11} />
                 <Tooltip contentStyle={tooltipStyle}
                          labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`} />
-                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false}
+                  activeDot={{ r: 5, onClick: (_e: any, pl: any) => { const id = pl?.payload?.id; if (id) verify({ subgrove: "yieldnest-governance", entityType: "transfer", entityId: id }); } }} />
               </LineChart>
             </ResponsiveContainer>
           )}

@@ -28,11 +28,6 @@ function Clickable({ hint, children }: { hint: string; children: React.ReactNode
   );
 }
 
-/** Pull the verifiable entity id out of a recharts click event. */
-function activeId(e: any): string | undefined {
-  return e?.activePayload?.[0]?.payload?.id;
-}
-
 /** Cumulative assets deposited over time — each point is one deposit. */
 export function CumulativeTvlChart({ deposits, subgrove = "yieldnest-vaults-eth" }: { deposits: Deposit[]; subgrove?: string }) {
   const { verify } = useVerify();
@@ -47,14 +42,14 @@ export function CumulativeTvlChart({ deposits, subgrove = "yieldnest-vaults-eth"
   return (
     <Clickable hint="Click a point to verify that deposit's proof">
       <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-          onClick={(e) => { const id = activeId(e); if (id) verify({ subgrove, entityType: "deposit", entityId: id }); }}>
+        <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="block" stroke="var(--yn-text-dim)" fontSize={11}
                  tickFormatter={(v) => v.toLocaleString()} />
           <YAxis stroke="var(--yn-text-dim)" fontSize={11} />
           <Tooltip contentStyle={tooltipStyle} labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`} />
-          <Line type="monotone" dataKey="cumulative" stroke={GREEN} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+          <Line type="monotone" dataKey="cumulative" stroke={GREEN} strokeWidth={2} dot={false}
+            activeDot={{ r: 5, onClick: (_e: any, pl: any) => { const id = pl?.payload?.id; if (id) verify({ subgrove, entityType: "deposit", entityId: id }); } }} />
         </LineChart>
       </ResponsiveContainer>
     </Clickable>
@@ -77,14 +72,13 @@ export function DepositVolumeChart({ deposits, subgrove = "yieldnest-vaults-eth"
   return (
     <Clickable hint="Click a bar to verify a deposit from that block range">
       <ResponsiveContainer width="100%" height={240}>
-        <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-          onClick={(e) => { const id = activeId(e); if (id) verify({ subgrove, entityType: "deposit", entityId: id }); }}>
+        <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="bucket" stroke="var(--yn-text-dim)" fontSize={11}
                  tickFormatter={(v) => v.toLocaleString()} />
           <YAxis stroke="var(--yn-text-dim)" fontSize={11} />
           <Tooltip contentStyle={tooltipStyle} labelFormatter={(v) => `Block bucket ${Number(v).toLocaleString()}`} />
-          <Bar dataKey="total" fill={GREEN} />
+          <Bar dataKey="total" fill={GREEN} onClick={(d: any) => { const id = d?.payload?.id; if (id) verify({ subgrove, entityType: "deposit", entityId: id }); }} />
         </BarChart>
       </ResponsiveContainer>
     </Clickable>
@@ -111,13 +105,12 @@ export function TopDepositorsChart({ deposits, subgrove = "yieldnest-vaults-eth"
   return (
     <Clickable hint="Click a bar to verify a deposit from that address">
       <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={data} layout="vertical" margin={{ top: 10, right: 20, left: 70, bottom: 0 }}
-          onClick={(e) => { const id = activeId(e); if (id) verify({ subgrove, entityType: "deposit", entityId: id }); }}>
+        <BarChart data={data} layout="vertical" margin={{ top: 10, right: 20, left: 70, bottom: 0 }}>
           <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" horizontal={false} />
           <XAxis type="number" stroke="var(--yn-text-dim)" fontSize={11} />
           <YAxis type="category" dataKey="owner" stroke="var(--yn-text-dim)" fontSize={11} width={90} />
           <Tooltip contentStyle={tooltipStyle} />
-          <Bar dataKey="total" fill={GREEN_DARK} />
+          <Bar dataKey="total" fill={GREEN_DARK} onClick={(d: any) => { const id = d?.payload?.id; if (id) verify({ subgrove, entityType: "deposit", entityId: id }); }} />
         </BarChart>
       </ResponsiveContainer>
     </Clickable>

@@ -151,8 +151,7 @@ export function Restaking() {
           <div className="sub" style={{ marginBottom: 12 }}>each point is a TotalETHStakedUpdated emission</div>
           {s.status === "ok" && stakedSeries.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={stakedSeries} margin={{ top: 10, right: 20, left: 0, bottom: 0 }} style={{ cursor: "pointer" }}
-                onClick={(e: any) => { const id = e?.activePayload?.[0]?.payload?.id; if (id) verify({ subgrove: "yieldnest-restaking-eth", entityType: "totalETHStakedUpdated", entityId: id }); }}>
+              <LineChart data={stakedSeries} margin={{ top: 10, right: 20, left: 0, bottom: 0 }} style={{ cursor: "pointer" }}>
                 <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="block" stroke="var(--yn-text-dim)" fontSize={11}
                        tickFormatter={(v) => v.toLocaleString()} />
@@ -161,7 +160,8 @@ export function Restaking() {
                   contentStyle={{ background: "var(--yn-surface)", border: "1px solid var(--yn-border)", borderRadius: 8, color: "var(--yn-text)", fontSize: 12 }}
                   labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`}
                 />
-                <Line type="monotone" dataKey="totalETHStaked" stroke="#4ea882" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="totalETHStaked" stroke="#4ea882" strokeWidth={2} dot={false}
+                  activeDot={{ r: 5, onClick: (_e: any, pl: any) => { const id = pl?.payload?.id; if (id) verify({ subgrove: "yieldnest-restaking-eth", entityType: "totalETHStakedUpdated", entityId: id }); } }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -177,8 +177,7 @@ export function Restaking() {
           <div className="sub" style={{ marginBottom: 12 }}>summed transfer value over block height</div>
           {s.status === "ok" && cumData.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }} style={{ cursor: "pointer" }}
-                onClick={(e: any) => { const id = e?.activePayload?.[0]?.payload?.id; if (id) verify({ subgrove: "yieldnest-vaults-eth", entityType: "transfer", entityId: id }); }}>
+              <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }} style={{ cursor: "pointer" }}>
                 <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="block" stroke="var(--yn-text-dim)" fontSize={11}
                        tickFormatter={(v) => v.toLocaleString()} />
@@ -187,7 +186,8 @@ export function Restaking() {
                   contentStyle={{ background: "var(--yn-surface)", border: "1px solid var(--yn-border)", borderRadius: 8, color: "var(--yn-text)", fontSize: 12 }}
                   labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`}
                 />
-                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false}
+                  activeDot={{ r: 5, onClick: (_e: any, pl: any) => { const id = pl?.payload?.id; if (id) verify({ subgrove: "yieldnest-vaults-eth", entityType: "transfer", entityId: id }); } }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
