@@ -1,8 +1,7 @@
 //! Regression test: every yieldnest subgrove manifest in
 //! `protocol/subgroves/*.json` must deserialize as the canonical
 //! `WillowManifest` defined by `willow-types`. The consensus validator
-//! rejects anything that doesn't, so any drift here is a deploy
-//! failure waiting to happen on the next devnet wipe + re-register.
+//! rejects anything that doesn't, so drift here is a registration failure.
 
 use serde::Deserialize;
 use std::path::PathBuf;

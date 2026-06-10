@@ -25,8 +25,8 @@ type State =
   | { status: "error"; message: string };
 
 /** Pull everything from a subgrove and filter client-side by lowercased address.
- *  Willow's GraphQL doesn't expose a `where: { owner: "..." }` filter yet,
- *  so we fetch and filter in JS — fine at demo scale. */
+ *  Willow's GraphQL doesn't expose a `where: { owner: "..." }` filter yet, so we
+ *  fetch and filter in JS. */
 export function useAddressActivity(subgrove: string, addr: string): State {
   const [s, setS] = useState<State>({ status: "idle" });
   useEffect(() => {

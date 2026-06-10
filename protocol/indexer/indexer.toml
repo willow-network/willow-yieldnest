@@ -1,15 +1,15 @@
-# YieldNest demo indexer — runs as did:willow:indexer-1 (pre-funded at genesis)
-# with a deterministic signing key (sha256 of "did:willow:indexer-1" +
-# "indexer-signing-key", per willow-indexer bin).
-
+# Reference indexer config for the YieldNest subgroves.
+#
+# Runs as a Willow indexer DID with a deterministic signing key derived from the
+# DID. On your own network, create and fund your own indexer identity.
 node_did = "did:willow:indexer-1"
 public_key_id = "did:willow:indexer-1#key-1"
 
-grovedb_path = "/Users/pauldelucia/Documents/Willow/willow-yieldnest/protocol/indexer/grovedb"
+# Relative so it resolves on any machine.
+grovedb_path = "./grovedb"
 
 consensus_rpc_endpoint = "http://localhost:26657"
 
-# Unique ports (avoid clash with the existing devnet indexers on 3042/30303/9090/10300)
 p2p_port = 30313
 metrics_port = 9100
 historical_query_port = 3051
@@ -18,45 +18,24 @@ grovedb_visualizer_port = 10310
 max_concurrent_indexing = 8
 storage_limit_gb = 100
 
-# Whitelist: keep this indexer focused on a known set so the marketplace
-# doesn't pull in unrelated subgroves (e.g. test subgroves on the same
-# chain) and squeeze one of them out at the `max_concurrent_indexing` cap.
+# Only index this set. These IDs must match the manifests in ../subgroves/ and
+# the dashboard's config.ts.
 subgrove_filter = [
     "yieldnest-vaults-eth",
-    "yieldnest-vaults-bnb",
-    "yieldnest-vaults-l2",
     "yieldnest-restaking-eth",
     "yieldnest-liquidity",
     "yieldnest-governance",
-    "uniswap-v3-eth-usdc",
 ]
 
-# Ethereum mainnet RPCs for YieldNest contracts. Public endpoints — rate-limited
-# but fine for a demo. For production swap in Alchemy/Infura URLs.
+# Ethereum mainnet RPC endpoints. The public endpoint below is unauthenticated
+# and rate-limited; for real throughput supply your own authenticated URL, e.g.
+#   "https://eth-mainnet.g.alchemy.com/v2/<your-key>",
 eth_rpc_endpoints = [
-    # Publicnode — unauthenticated, unlimited, handles concurrent pipelines.
-    # Infura/Alchemy removed: the fallback rotation (PR #134) round-robins
-    # to them whenever publicnode is slow, which burned through Infura's
-    # daily credit quota overnight. We don't need paid fallbacks for a demo.
     "https://ethereum.publicnode.com",
 ]
 
-# Per-chain RPC endpoints for non-Ethereum subgroves. Keys are EVM chain_ids.
-# Used by subgroves whose manifest specifies chain_id != 1.
-#
-# Non-Ethereum chains don't have Helios-equivalent light clients on the
-# validator, so submissions for these chains go through on the RPC-trusted
-# path (event_proofs skipped, indexer is trust anchor). The dashboard should
-# badge these rows as "RPC-verified" vs "beacon-chain-verified" for Ethereum.
-[rpc_endpoints_per_chain]
-# BNB Chain (chain_id 56) — ynBNB, ynBNBx, ynBTCk. bloXroute first
-# (archive-capable from us-east-1); publicnode/Ankr as fallback.
-"56" = ["https://bsc.rpc.blxrbdn.com", "https://bsc.publicnode.com", "https://rpc.ankr.com/bsc"]
-# Optimism (chain_id 10) — ynETHx_op, ynBTCk_op (vaults-l2 subgrove)
-"10" = ["https://optimism.publicnode.com", "https://mainnet.optimism.io"]
-# Arbitrum One (chain_id 42161) — future L2 mirror vaults
-"42161" = ["https://arbitrum-one.publicnode.com", "https://arb1.arbitrum.io/rpc"]
-# Base (chain_id 8453) — future Coinbase L2 mirror vaults
-"8453" = ["https://base.publicnode.com", "https://mainnet.base.org"]
-# Polygon (chain_id 137) — stablecoin / RWA products
-"137" = ["https://polygon-bor.publicnode.com", "https://polygon-rpc.com"]
+# For subgroves on other chains (manifest chain_id != 1), add per-chain RPC
+# endpoints here, keyed by EVM chain_id. Example:
+#   [rpc_endpoints_per_chain]
+#   "10"   = ["https://optimism.publicnode.com"]   # Optimism
+#   "8453" = ["https://base.publicnode.com"]        # Base
