@@ -1,23 +1,14 @@
-import { useEffect, useState } from "react";
-
 /**
- * Loading state for the verifiable dashboard. While proof-backed data is in
- * flight, a counter ticks up to convey that proofs are being pulled + checked —
- * instead of a bare "loading…" or a misleading "no data" (which reads as empty
- * even when a request is still running). Resolves to real content once loaded.
+ * Loading state for the verifiable dashboard. Proof-backed data is in flight;
+ * once it resolves, every figure can be re-verified on click. (Honest loader —
+ * no fabricated counter; the real per-proof count belongs to the on-click
+ * verify flow, not the bulk fetch.)
  */
-export function ProofLoader({ label = "Loading & verifying proofs" }: { label?: string }) {
-  const [n, setN] = useState(1);
-  useEffect(() => {
-    const id = setInterval(() => setN((x) => x + 1 + Math.floor(Math.random() * 5)), 65);
-    return () => clearInterval(id);
-  }, []);
+export function ProofLoader({ label = "Loading proof-backed data" }: { label?: string }) {
   return (
     <div className="yn-proof-loader">
       <span className="yn-proof-spinner" aria-hidden />
-      <span>
-        {label} <span className="yn-proof-count">{n.toLocaleString()}</span>…
-      </span>
+      <span>{label}…</span>
     </div>
   );
 }

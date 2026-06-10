@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { ProofViewer } from "./ProofViewer";
+import { useVerify } from "./Verify";
 
 type Props = {
   subgrove: string;
@@ -9,25 +8,14 @@ type Props = {
 };
 
 export function ProofBadge({ subgrove, entityType, entityIdField = "id", entityId }: Props) {
-  const [open, setOpen] = useState(false);
+  const { verify } = useVerify();
   return (
-    <>
-      <span
-        className="yn-proof-badge yn-proof-link"
-        onClick={() => setOpen(true)}
-        title="Click to see the Merkle proof"
-      >
-        Willow verified
-      </span>
-      {open && (
-        <ProofViewer
-          subgrove={subgrove}
-          entityType={entityType}
-          entityIdField={entityIdField}
-          entityId={entityId}
-          onClose={() => setOpen(false)}
-        />
-      )}
-    </>
+    <span
+      className="yn-proof-badge yn-proof-link"
+      onClick={() => verify({ subgrove, entityType, entityIdField, entityId })}
+      title="Click to verify the Merkle proof in your browser"
+    >
+      Willow verified
+    </span>
   );
 }
