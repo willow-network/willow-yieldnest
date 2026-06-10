@@ -4,7 +4,7 @@ A YieldNest analytics dashboard where every number on the screen is backed by a 
 
 **Live: [yieldnest.willow.tech](https://yieldnest.willow.tech)**
 
-![YieldNest verified dashboard](dashboard/public/og-card.jpg)
+![YieldNest verified dashboard](dashboard/public/og-card-launch.jpg)
 
 ## Why this is different
 
