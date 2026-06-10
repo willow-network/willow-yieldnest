@@ -1,6 +1,6 @@
 # YieldNest, verified
 
-A YieldNest analytics dashboard where every number on the screen is backed by a proof your browser re-checks. Vault TVL, deposits, restaking flow, governance — each figure carries a **Willow verified** badge you can click to see, and re-verify, the proof behind it. Nothing here asks you to trust the server.
+A YieldNest analytics dashboard where every number on the screen is backed by a proof your browser verifies. Vault TVL, deposits, restaking flow, governance — each figure carries a **Willow verified** badge you can click to see, and verify, the proof behind it. Nothing here asks you to trust the server.
 
 **Live: [yieldnest.willow.tech](https://yieldnest.willow.tech)**
 
