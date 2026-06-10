@@ -87,7 +87,7 @@ The dashboard renders live data for the Ethereum vaults, restaking contracts, an
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). The YieldNest name and logo are trademarks of YieldNest, used per their public [brand guidelines](https://docs.yieldnest.finance/brand-assets/logo-and-styleguide); the MIT license covers this repository's code, not those marks.
 
 ## Links
 
