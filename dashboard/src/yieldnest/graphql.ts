@@ -17,14 +17,30 @@ export type WillowProof = {
   ethereum_anchor: null | { block_number: number; tx_hash: number[]; contract: string };
 };
 
+// Abort a request that hangs too long (e.g. the query path starved during a
+// heavy backfill) so the UI can show a "catching up" state and the poll loop
+// can retry, instead of spinning forever on one stuck request.
+const QUERY_TIMEOUT_MS = 25000;
+
 async function gqlFetch<T>(
   subgrove: string, query: string, includeProof: boolean,
 ): Promise<{ data: T; proof: WillowProof | null }> {
-  const r = await fetch(`${GQL_BASE}/graphql/${subgrove}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, include_proof: includeProof }),
-  });
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), QUERY_TIMEOUT_MS);
+  let r: Response;
+  try {
+    r = await fetch(`${GQL_BASE}/graphql/${subgrove}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, include_proof: includeProof }),
+      signal: ctrl.signal,
+    });
+  } catch (e: any) {
+    if (e?.name === "AbortError") throw new Error(`gql ${subgrove}: timed out (indexer busy)`);
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
   if (!r.ok) {
     if (r.status === 404 || r.status === 500) {
       const text = await r.text().catch(() => "");

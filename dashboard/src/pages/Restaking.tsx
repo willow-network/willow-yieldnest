@@ -1,5 +1,6 @@
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
 import { SampleProofBadge } from "../yieldnest/SampleProofBadge";
+import { useVerify } from "../yieldnest/Verify";
 import { ProofLoader } from "../yieldnest/ProofLoader";
 import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
@@ -81,6 +82,7 @@ export function Restaking() {
   const s = useRestakingData();
   const xfers = s.status === "ok" ? s.data.transfers : [];
   const staked = s.status === "ok" ? s.data.staked : [];
+  const { verify } = useVerify();
 
   const uniqueAddrs = new Set<string>();
   for (const t of xfers) { uniqueAddrs.add(t.from); uniqueAddrs.add(t.to); }
@@ -89,7 +91,7 @@ export function Restaking() {
   let cum = 0;
   const cumData = sortedXfers.map(t => {
     cum += weiToEth(t.value);
-    return { block: Number(t.blockNumber), cumulative: Number(cum.toFixed(4)) };
+    return { block: Number(t.blockNumber), cumulative: Number(cum.toFixed(4)), id: t.id };
   });
 
   const latestTotalStakedEth = (() => {
@@ -103,6 +105,7 @@ export function Restaking() {
   const stakedSeries = [...staked]
     .sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber))
     .map(u => ({
+      id: u.id,
       block: Number(u.blockNumber),
       totalETHStaked: Number(weiToEth(u.totalETHStaked).toFixed(4)),
     }));
@@ -148,7 +151,8 @@ export function Restaking() {
           <div className="sub" style={{ marginBottom: 12 }}>each point is a TotalETHStakedUpdated emission</div>
           {s.status === "ok" && stakedSeries.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={stakedSeries} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <LineChart data={stakedSeries} margin={{ top: 10, right: 20, left: 0, bottom: 0 }} style={{ cursor: "pointer" }}
+                onClick={(e: any) => { const id = e?.activePayload?.[0]?.payload?.id; if (id) verify({ subgrove: "yieldnest-restaking-eth", entityType: "totalETHStakedUpdated", entityId: id }); }}>
                 <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="block" stroke="var(--yn-text-dim)" fontSize={11}
                        tickFormatter={(v) => v.toLocaleString()} />
@@ -157,7 +161,7 @@ export function Restaking() {
                   contentStyle={{ background: "var(--yn-surface)", border: "1px solid var(--yn-border)", borderRadius: 8, color: "var(--yn-text)", fontSize: 12 }}
                   labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`}
                 />
-                <Line type="monotone" dataKey="totalETHStaked" stroke="#4ea882" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="totalETHStaked" stroke="#4ea882" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -173,7 +177,8 @@ export function Restaking() {
           <div className="sub" style={{ marginBottom: 12 }}>summed transfer value over block height</div>
           {s.status === "ok" && cumData.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <LineChart data={cumData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }} style={{ cursor: "pointer" }}
+                onClick={(e: any) => { const id = e?.activePayload?.[0]?.payload?.id; if (id) verify({ subgrove: "yieldnest-vaults-eth", entityType: "transfer", entityId: id }); }}>
                 <CartesianGrid stroke="var(--yn-border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="block" stroke="var(--yn-text-dim)" fontSize={11}
                        tickFormatter={(v) => v.toLocaleString()} />
@@ -182,7 +187,7 @@ export function Restaking() {
                   contentStyle={{ background: "var(--yn-surface)", border: "1px solid var(--yn-border)", borderRadius: 8, color: "var(--yn-text)", fontSize: 12 }}
                   labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`}
                 />
-                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
