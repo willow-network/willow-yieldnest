@@ -28,35 +28,64 @@ const SUBGROVE_QUERIES: Record<string, string> = {
 // surfaces via `NoIndexingProgressError`.
 type SubgroveStatus = { count: number; indexing: boolean };
 
+// Each subgrove polls independently and renders as soon as its count lands —
+// the indexer's tail latency (p99 in the tens of seconds) must not gate the
+// whole panel on the slowest of four queries. Transient failures retry with
+// backoff inside the tick and keep the last known count rather than flashing
+// zeros; only NoIndexingProgressError marks a subgrove "pending". Early
+// attempts fail fast to catch latency variance; the final attempt gets the
+// full budget so a uniformly slow (but healthy) indexer still lands.
+const COUNT_POLL_MS = 30000;
+const COUNT_TIMEOUT_MS = 8000;
+const COUNT_TIMEOUT_FINAL_MS = 25000;
+const COUNT_RETRY_BASE_MS = 1500;
+const COUNT_RETRIES = 2;
+
 function useCounts() {
   const [counts, setCounts] = useState<Record<string, SubgroveStatus>>({});
   useEffect(() => {
     let alive = true;
-    const tick = async () => {
-      const entries = await Promise.all(SUBGROVE_IDS.map(async sg => {
+    const cancels: Array<() => void> = [];
+
+    SUBGROVE_IDS.forEach(sg => {
+      const query = SUBGROVE_QUERIES[sg] ?? `{ deposits(first:150){id} transfers(first:150){id} }`;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      let attempt = 0;
+      const schedule = (ms: number) => { timer = setTimeout(run, ms); };
+      const run = async () => {
+        if (!alive) return;
         try {
-          const query = SUBGROVE_QUERIES[sg] ?? `{ deposits(first:150){id} transfers(first:150){id} }`;
-          const d = await runQuery<any>(sg, query);
+          const timeoutMs = attempt < COUNT_RETRIES ? COUNT_TIMEOUT_MS : COUNT_TIMEOUT_FINAL_MS;
+          const d = await runQuery<any>(sg, query, { timeoutMs });
+          if (!alive) return;
           const n = Object.values(d).reduce((sum: number, arr: any) =>
             sum + (Array.isArray(arr) ? arr.length : 0), 0);
-          return [sg, { count: n, indexing: true }] as const;
+          setCounts(prev => ({ ...prev, [sg]: { count: n, indexing: true } }));
+          attempt = 0;
+          schedule(COUNT_POLL_MS);
         } catch (e) {
+          if (!alive) return;
           if (e instanceof NoIndexingProgressError) {
-            return [sg, { count: 0, indexing: false }] as const;
+            setCounts(prev => ({ ...prev, [sg]: { count: 0, indexing: false } }));
+            attempt = 0;
+            schedule(COUNT_POLL_MS);
+            return;
           }
           console.warn(`counts(${sg})`, e);
-          // Transient indexer errors aren't a definitive "not indexing" —
-          // treat as still-indexing so the UI doesn't flap to "pending" on
-          // a flaky network blip.
-          return [sg, { count: 0, indexing: true }] as const;
+          if (attempt < COUNT_RETRIES) {
+            attempt += 1;
+            schedule(COUNT_RETRY_BASE_MS * 2 ** (attempt - 1));
+          } else {
+            attempt = 0;
+            schedule(COUNT_POLL_MS);
+          }
         }
-      }));
-      if (!alive) return;
-      setCounts(Object.fromEntries(entries));
-    };
-    tick();
-    const id = setInterval(tick, 30000);
-    return () => { alive = false; clearInterval(id); };
+      };
+      run();
+      cancels.push(() => { if (timer !== undefined) clearTimeout(timer); });
+    });
+
+    return () => { alive = false; cancels.forEach(c => c()); };
   }, []);
   return counts;
 }
