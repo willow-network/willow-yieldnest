@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useChartColors } from "../yieldnest/chartColors";
 import { SubgroveStatus } from "../yieldnest/SubgroveStatus";
 import { ProofLoader } from "../yieldnest/ProofLoader";
 import { useDeposits, assetsNumberHeuristic } from "../yieldnest/useDeposits";
@@ -43,6 +44,7 @@ function useRestakingActivity(): number {
 export function RiskRadar() {
   const eth = useDeposits("yieldnest-vaults-eth");
   const restakeVol = useRestakingActivity();
+  const cc = useChartColors();
 
   const depositsEth = eth.status === "ok" ? eth.deposits : [];
 
@@ -117,8 +119,8 @@ export function RiskRadar() {
                 <Radar
                   name="ynETH family"
                   dataKey="value"
-                  stroke="#2c7a5c"
-                  fill="#4ea882"
+                  stroke={cc.greenDark}
+                  fill={cc.green}
                   fillOpacity={0.45}
                 />
                 <Tooltip

@@ -4,6 +4,7 @@ import { useVerify } from "../yieldnest/Verify";
 import { ProofLoader } from "../yieldnest/ProofLoader";
 import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
+import { useChartColors } from "../yieldnest/chartColors";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
 import {
   ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip,
@@ -83,6 +84,7 @@ export function Restaking() {
   const xfers = s.status === "ok" ? s.data.transfers : [];
   const staked = s.status === "ok" ? s.data.staked : [];
   const { verify } = useVerify();
+  const cc = useChartColors();
 
   const uniqueAddrs = new Set<string>();
   for (const t of xfers) { uniqueAddrs.add(t.from); uniqueAddrs.add(t.to); }
@@ -160,7 +162,7 @@ export function Restaking() {
                   contentStyle={{ background: "var(--yn-surface)", border: "1px solid var(--yn-border)", borderRadius: 8, color: "var(--yn-text)", fontSize: 12 }}
                   labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`}
                 />
-                <Line type="monotone" dataKey="totalETHStaked" stroke="#4ea882" strokeWidth={2} dot={false}
+                <Line type="monotone" dataKey="totalETHStaked" stroke={cc.green} strokeWidth={2} dot={false}
                   activeDot={{ r: 5, onClick: (_e: any, pl: any) => { const id = pl?.payload?.id; if (id) verify({ subgrove: "yieldnest-restaking-eth", entityType: "totalETHStakedUpdated", entityId: id }); } }} />
               </LineChart>
             </ResponsiveContainer>
@@ -186,7 +188,7 @@ export function Restaking() {
                   contentStyle={{ background: "var(--yn-surface)", border: "1px solid var(--yn-border)", borderRadius: 8, color: "var(--yn-text)", fontSize: 12 }}
                   labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`}
                 />
-                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false}
+                <Line type="monotone" dataKey="cumulative" stroke={cc.green} strokeWidth={2} dot={false}
                   activeDot={{ r: 5, onClick: (_e: any, pl: any) => { const id = pl?.payload?.id; if (id) verify({ subgrove: "yieldnest-vaults-eth", entityType: "transfer", entityId: id }); } }} />
               </LineChart>
             </ResponsiveContainer>

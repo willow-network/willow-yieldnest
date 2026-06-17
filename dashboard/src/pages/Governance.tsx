@@ -5,6 +5,7 @@ import { VerifyAllBadge } from "../yieldnest/VerifyAllBadge";
 import { useVerify } from "../yieldnest/Verify";
 import { CopyAddress } from "../yieldnest/CopyAddress";
 import { useEffect, useState } from "react";
+import { useChartColors } from "../yieldnest/chartColors";
 import { runQuery, NoIndexingProgressError } from "../yieldnest/graphql";
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar,
@@ -68,6 +69,7 @@ function short(addr: string) {
 export function Governance() {
   const s = useGovernanceTransfers();
   const { verify } = useVerify();
+  const cc = useChartColors();
   const xfers = s.status === "ok" ? s.transfers : [];
 
   // Net balance per address (accounts for mint/burn via the zero address).
@@ -148,7 +150,7 @@ export function Governance() {
                 <YAxis stroke="var(--yn-text-dim)" fontSize={11} />
                 <Tooltip contentStyle={tooltipStyle}
                          labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`} />
-                <Line type="monotone" dataKey="cumulative" stroke="#4ea882" strokeWidth={2} dot={false}
+                <Line type="monotone" dataKey="cumulative" stroke={cc.green} strokeWidth={2} dot={false}
                   activeDot={{ r: 5, onClick: (_e: any, pl: any) => { const id = pl?.payload?.id; if (id) verify({ subgrove: "yieldnest-governance", entityType: "transfer", entityId: id }); } }} />
               </LineChart>
             </ResponsiveContainer>
@@ -170,7 +172,7 @@ export function Governance() {
                 <YAxis type="category" dataKey="short" stroke="var(--yn-text-dim)"
                        fontSize={11} width={110} />
                 <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="balance" fill="#2c7a5c" />
+                <Bar dataKey="balance" fill={cc.greenDark} />
               </BarChart>
             </ResponsiveContainer>
           )}

@@ -4,11 +4,7 @@ import {
 } from "recharts";
 import { Deposit, assetsNumberHeuristic } from "./useDeposits";
 import { useVerify } from "./Verify";
-
-const GREEN = "#4ea882";
-const GREEN_DARK = "#2c7a5c";
-const GREEN_LIGHT = "#7acba7";
-const PALETTE = [GREEN, GREEN_DARK, GREEN_LIGHT, "#b45309", "#5a6b60", "#c5d6ca"];
+import { useChartColors } from "./chartColors";
 
 const tooltipStyle = {
   background: "var(--yn-surface)",
@@ -31,6 +27,7 @@ function Clickable({ hint, children }: { hint: string; children: React.ReactNode
 /** Cumulative assets deposited over time — each point is one deposit. */
 export function CumulativeTvlChart({ deposits, subgrove = "yieldnest-vaults-eth" }: { deposits: Deposit[]; subgrove?: string }) {
   const { verify } = useVerify();
+  const cc = useChartColors();
   const sorted = [...deposits].sort(
     (a, b) => Number(a.blockNumber) - Number(b.blockNumber),
   );
@@ -48,7 +45,7 @@ export function CumulativeTvlChart({ deposits, subgrove = "yieldnest-vaults-eth"
                  tickFormatter={(v) => v.toLocaleString()} />
           <YAxis stroke="var(--yn-text-dim)" fontSize={11} />
           <Tooltip contentStyle={tooltipStyle} labelFormatter={(v) => `Block ${Number(v).toLocaleString()}`} />
-          <Line type="monotone" dataKey="cumulative" stroke={GREEN} strokeWidth={2} dot={false}
+          <Line type="monotone" dataKey="cumulative" stroke={cc.green} strokeWidth={2} dot={false}
             activeDot={{ r: 5, onClick: (_e: any, pl: any) => { const id = pl?.payload?.id; if (id) verify({ subgrove, entityType: "deposit", entityId: id }); } }} />
         </LineChart>
       </ResponsiveContainer>
@@ -59,6 +56,7 @@ export function CumulativeTvlChart({ deposits, subgrove = "yieldnest-vaults-eth"
 /** Deposits per 200-block bucket — click a bar to verify a deposit from it. */
 export function DepositVolumeChart({ deposits, subgrove = "yieldnest-vaults-eth" }: { deposits: Deposit[]; subgrove?: string }) {
   const { verify } = useVerify();
+  const cc = useChartColors();
   const BUCKET = 200;
   const byBucket = new Map<number, { total: number; id: string }>();
   for (const d of deposits) {
@@ -78,7 +76,7 @@ export function DepositVolumeChart({ deposits, subgrove = "yieldnest-vaults-eth"
                  tickFormatter={(v) => v.toLocaleString()} />
           <YAxis stroke="var(--yn-text-dim)" fontSize={11} />
           <Tooltip contentStyle={tooltipStyle} labelFormatter={(v) => `Block bucket ${Number(v).toLocaleString()}`} />
-          <Bar dataKey="total" fill={GREEN} onClick={(d: any) => { const id = d?.payload?.id; if (id) verify({ subgrove, entityType: "deposit", entityId: id }); }} />
+          <Bar dataKey="total" fill={cc.green} onClick={(d: any) => { const id = d?.payload?.id; if (id) verify({ subgrove, entityType: "deposit", entityId: id }); }} />
         </BarChart>
       </ResponsiveContainer>
     </Clickable>
@@ -88,6 +86,7 @@ export function DepositVolumeChart({ deposits, subgrove = "yieldnest-vaults-eth"
 /** Top depositors by summed value — click a bar to verify one of their deposits. */
 export function TopDepositorsChart({ deposits, subgrove = "yieldnest-vaults-eth" }: { deposits: Deposit[]; subgrove?: string }) {
   const { verify } = useVerify();
+  const cc = useChartColors();
   const byOwner = new Map<string, { total: number; id: string }>();
   for (const d of deposits) {
     if (!d.owner) continue;
@@ -110,7 +109,7 @@ export function TopDepositorsChart({ deposits, subgrove = "yieldnest-vaults-eth"
           <XAxis type="number" stroke="var(--yn-text-dim)" fontSize={11} />
           <YAxis type="category" dataKey="owner" stroke="var(--yn-text-dim)" fontSize={11} width={90} />
           <Tooltip contentStyle={tooltipStyle} />
-          <Bar dataKey="total" fill={GREEN_DARK} onClick={(d: any) => { const id = d?.payload?.id; if (id) verify({ subgrove, entityType: "deposit", entityId: id }); }} />
+          <Bar dataKey="total" fill={cc.greenDark} onClick={(d: any) => { const id = d?.payload?.id; if (id) verify({ subgrove, entityType: "deposit", entityId: id }); }} />
         </BarChart>
       </ResponsiveContainer>
     </Clickable>
@@ -123,6 +122,7 @@ export function SubgroveShareChart({
 }: {
   slices: Array<{ name: string; value: number }>;
 }) {
+  const cc = useChartColors();
   const nonzero = slices.filter(s => s.value > 0);
   if (nonzero.length === 0) {
     return <p className="yn-placeholder">no entities indexed yet</p>;
@@ -135,7 +135,7 @@ export function SubgroveShareChart({
           cx="50%" cy="50%" innerRadius={55} outerRadius={95}
           stroke="var(--yn-surface)" strokeWidth={2}
         >
-          {nonzero.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
+          {nonzero.map((_, i) => <Cell key={i} fill={cc.palette[i % cc.palette.length]} />)}
         </Pie>
         <Legend wrapperStyle={{ fontSize: 12, color: "var(--yn-text)" }} />
         <Tooltip contentStyle={tooltipStyle} />

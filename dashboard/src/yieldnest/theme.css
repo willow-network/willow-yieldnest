@@ -2,18 +2,18 @@
 
 :root,
 [data-theme='light'] {
-  --yn-bg: #eef4ef;              /* cooler, greener off-white */
+  --yn-bg: #f6f7f9;              /* clean cool neutral — no green cast */
   --yn-surface: #ffffff;
-  --yn-border: #c5d6ca;          /* green-tinted */
-  --yn-text: #152820;
-  --yn-text-dim: #556b60;
-  --yn-accent: #2c7a5c;
-  --yn-accent-glow: #4ea882;
-  --yn-success: #2c7a5c;
+  --yn-border: #e3e6ec;          /* crisp hairline */
+  --yn-text: #101828;            /* near-black ink carries the hierarchy */
+  --yn-text-dim: #5a6473;
+  --yn-accent: #0a7d59;          /* vivid emerald — AA on white as link text + fill */
+  --yn-accent-glow: #10b07f;     /* brighter — hover / glow only */
+  --yn-success: #067a52;
   --yn-warn: #b45309;
-  --yn-proof: #2c7a5c;
-  --yn-proof-bg: rgba(44, 122, 92, 0.1);
-  --yn-proof-border: rgba(44, 122, 92, 0.35);
+  --yn-proof: #0a7d59;                       /* readable emerald text for verified panels */
+  --yn-proof-bg: rgba(10, 125, 89, 0.1);     /* light tint — background of verified message panels */
+  --yn-proof-border: rgba(10, 125, 89, 0.35);
 }
 
 [data-theme='dark'] {
@@ -48,7 +48,9 @@ body {
   color: var(--yn-text);
 }
 [data-theme='light'] .yn-header {
-  background: linear-gradient(180deg, #ffffff 0%, #f4fbf6 100%);
+  background: #ffffff;
+  border-bottom: 2px solid var(--yn-accent);   /* green stripe under the header — matches dark */
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 .yn-logo { display: flex; align-items: center; }
@@ -78,26 +80,27 @@ body {
 .yn-card {
   background: var(--yn-surface);
   border: 1px solid var(--yn-border);
-  border-top: 3px solid var(--yn-accent);
+  border-top: 3px solid var(--yn-accent);   /* emerald top-stripe — both themes */
   border-radius: 14px;
   padding: 20px 22px;
   color: var(--yn-text);
   box-shadow: 0 1px 2px rgba(44, 122, 92, 0.04);
 }
 [data-theme='light'] .yn-card {
-  background: linear-gradient(168deg, #ffffff 50%, #edf6f0 100%);
-  border-color: #aecfba;
-  box-shadow: 0 2px 8px rgba(44, 122, 92, 0.08), 0 0 0 1px rgba(44, 122, 92, 0.04);
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.04);
 }
 .yn-card h3 { margin: 0 0 4px; font-size: 14px; color: var(--yn-accent); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
 .yn-card .big { font-size: 28px; font-weight: 700; color: var(--yn-text); }
 [data-theme='dark'] .yn-card h3 { color: var(--yn-text-dim); font-weight: 500; }
+/* In light, card labels go neutral so green stops being wallpaper and the eye gets a hierarchy. */
+[data-theme='light'] .yn-card h3 { color: var(--yn-text-dim); font-weight: 600; }
 .yn-card .sub { font-size: 13px; color: var(--yn-text-dim); margin-top: 4px; }
 
 .yn-proof-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-size: 11px;
   color: var(--yn-proof);
   background: var(--yn-proof-bg);
@@ -106,7 +109,39 @@ body {
   border-radius: 999px;
   font-weight: 500;
 }
-.yn-proof-badge::before { content: "✓"; font-weight: 700; }
+.yn-proof-badge::before { content: "✓"; font-weight: 600; font-size: 10px; }
+/* Light: the verified badge is the product's headline — solid emerald, white text, confident.
+   Background/border are set explicitly here (not via --yn-proof-bg, which stays a light tint for
+   the verified message panels) so the badge is solid while those panels stay readable. */
+[data-theme='light'] .yn-proof-badge {
+  background: var(--yn-accent);
+  border-color: var(--yn-accent);
+  color: #ffffff;
+}
+/* Clickable verified pills (.yn-proof-link): the pill shape + pointer + hover signal interactivity,
+   so drop the dotted underline that read as messy over the solid fill. */
+[data-theme='light'] .yn-proof-badge.yn-proof-link { text-decoration: none; }
+/* Darken on hover and force white text — overrides the base .yn-proof-link:hover that turns the
+   text emerald (which on the now-solid pill would be green-on-green / invisible). */
+[data-theme='light'] .yn-proof-badge.yn-proof-link:hover {
+  background: #086648;
+  border-color: #086648;
+  color: #ffffff;
+}
+/* Dark: same solid-pill treatment as light (matches the dark "Block explorer" pill). Dark text on the
+   lighter dark-accent for contrast, no underline, and the PILL brightens on hover (text stays put) —
+   so hover behaves like light instead of recoloring the text. */
+[data-theme='dark'] .yn-proof-badge {
+  background: var(--yn-accent);
+  border-color: var(--yn-accent);
+  color: var(--yn-bg);
+}
+[data-theme='dark'] .yn-proof-badge.yn-proof-link { text-decoration: none; }
+[data-theme='dark'] .yn-proof-badge.yn-proof-link:hover {
+  background: var(--yn-accent-glow);
+  border-color: var(--yn-accent-glow);
+  color: var(--yn-bg);
+}
 .yn-proof-link {
   cursor: pointer;
   color: var(--yn-accent);
@@ -127,6 +162,7 @@ body {
 .yn-table th, .yn-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--yn-border); }
 .yn-table th { color: var(--yn-accent); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
 [data-theme='dark'] .yn-table th { color: var(--yn-text-dim); font-weight: 500; }
+[data-theme='light'] .yn-table th { color: var(--yn-text-dim); font-weight: 600; }
 
 .yn-placeholder { color: var(--yn-text-dim); }
 
@@ -182,6 +218,8 @@ body {
 .yn-footer-links a.yn-explorer-pill { color: #fff; text-decoration: none; }
 [data-theme='dark'] .yn-footer-links a.yn-explorer-pill { color: var(--yn-bg); }
 .yn-footer-links a.yn-explorer-pill:hover { background: var(--yn-accent-glow); }
+/* Light: darken on hover instead of brightening — white text on the lighter glow is too low-contrast. */
+[data-theme='light'] .yn-footer-links a.yn-explorer-pill:hover { background: #086648; }
 
 @media (max-width: 768px) {
   .yn-header {
